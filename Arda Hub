@@ -730,8 +730,7 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/blabla6767yoo-cmyk/Sc
 })
 
 local Button = Tab:CreateButton({
-   Name = "Dead rails gojo class",
+   Name = "gojo class dead rails",
    Callback = function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/blabla6767yoo-cmyk/Scripts/refs/heads/main/Ghost%20Hub%20Key%20Bypass"))()
-   end,
+loadstring(game:HttpGet("https://raw.githubusercontent.com/LolnotaKid/SCRIPTSBYVEUX/refs/heads/main/LALALALALALAGOJOOO.lua.txt"))(),
 })
