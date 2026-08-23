@@ -1,9 +1,11 @@
--- ARDA HUB MOBILE V8
--- Roblox Studio / private test oyunu
+--========================================================--
+--                 ARDA HUB MOBILE V10                    --
+--========================================================--
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
 
 local Player = Players.LocalPlayer
 
@@ -11,61 +13,61 @@ local Character
 local Humanoid
 local Root
 
-local State = {
+local Settings = {
 	God = false,
 	Fly = false,
 	Speed = false,
 	Jump = false,
+	InfiniteJump = false,
 	Noclip = false,
-	Hover = false
+	Hover = false,
+	FullBright = false,
+	Sprint = false
 }
 
+local WalkSpeed = 16
 local FlySpeed = 80
+local JumpPower = 50
 
---==================================================
--- CHARACTER
---==================================================
-
-local function LoadCharacter(char)
-	Character = char
-	Humanoid = char:WaitForChild("Humanoid")
-	Root = char:WaitForChild("HumanoidRootPart")
+local function LoadCharacter(CharacterModel)
+	Character = CharacterModel
+	Humanoid = Character:WaitForChild("Humanoid")
+	Root = Character:WaitForChild("HumanoidRootPart")
 end
 
 if Player.Character then
 	LoadCharacter(Player.Character)
 end
 
-Player.CharacterAdded:Connect(function(char)
+Player.CharacterAdded:Connect(function(CharacterModel)
 	task.wait(0.2)
-	LoadCharacter(char)
+	LoadCharacter(CharacterModel)
 end)
 
---==================================================
+--========================================================--
 -- GUI
---==================================================
+--========================================================--
 
 local Gui = Instance.new("ScreenGui")
-Gui.Name = "ArdaHubMobile"
+Gui.Name = "ArdaHubV10"
 Gui.ResetOnSpawn = false
 Gui.IgnoreGuiInset = true
 Gui.DisplayOrder = 999
 Gui.Parent = Player:WaitForChild("PlayerGui")
 
---==================================================
--- ANA PANEL
---==================================================
+--========================================================--
+-- MAIN
+--========================================================--
 
 local Main = Instance.new("Frame")
-Main.Size = UDim2.fromOffset(350,470)
-Main.Position = UDim2.new(.5,-175,.5,-235)
-Main.BackgroundColor3 = Color3.fromRGB(10,10,14)
+Main.Size = UDim2.fromOffset(360,520)
+Main.Position = UDim2.new(.5,-180,.5,-260)
+Main.BackgroundColor3 = Color3.fromRGB(9,9,13)
 Main.BorderSizePixel = 0
-Main.ZIndex = 10
 Main.Parent = Gui
 
 local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0,20)
+MainCorner.CornerRadius = UDim.new(0,22)
 MainCorner.Parent = Main
 
 local MainStroke = Instance.new("UIStroke")
@@ -73,64 +75,71 @@ MainStroke.Color = Color3.fromRGB(255,25,45)
 MainStroke.Thickness = 2
 MainStroke.Parent = Main
 
+--========================================================--
 -- HEADER
+--========================================================--
 
 local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1,0,0,75)
-Header.BackgroundColor3 = Color3.fromRGB(130,0,20)
+Header.Size = UDim2.new(1,0,0,82)
+Header.BackgroundColor3 = Color3.fromRGB(125,0,20)
 Header.BorderSizePixel = 0
 Header.Parent = Main
 
 local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0,20)
+HeaderCorner.CornerRadius = UDim.new(0,22)
 HeaderCorner.Parent = Header
 
 local Title = Instance.new("TextLabel")
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.fromOffset(18,8)
-Title.Size = UDim2.new(1,-36,0,35)
+Title.Position = UDim2.fromOffset(20,8)
+Title.Size = UDim2.new(1,-40,0,40)
 Title.Text = "ARDA HUB"
 Title.TextColor3 = Color3.new(1,1,1)
 Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 28
+Title.TextSize = 30
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
 local Version = Instance.new("TextLabel")
 Version.BackgroundTransparency = 1
-Version.Position = UDim2.fromOffset(20,43)
-Version.Size = UDim2.new(1,-40,0,20)
-Version.Text = "MOBILE • V8"
+Version.Position = UDim2.fromOffset(21,47)
+Version.Size = UDim2.new(1,-42,0,22)
+Version.Text = "MOBILE • V10"
 Version.TextColor3 = Color3.fromRGB(255,190,195)
 Version.Font = Enum.Font.GothamBold
 Version.TextSize = 11
 Version.TextXAlignment = Enum.TextXAlignment.Left
 Version.Parent = Header
 
---==================================================
+--========================================================--
 -- SCROLL
---==================================================
+--========================================================--
 
 local Scroll = Instance.new("ScrollingFrame")
-Scroll.Position = UDim2.fromOffset(12,85)
-Scroll.Size = UDim2.new(1,-24,1,-97)
+Scroll.Position = UDim2.fromOffset(12,92)
+Scroll.Size = UDim2.new(1,-24,1,-104)
 Scroll.BackgroundTransparency = 1
 Scroll.BorderSizePixel = 0
 Scroll.ScrollBarThickness = 4
-Scroll.ScrollBarImageColor3 = Color3.fromRGB(255,30,45)
+Scroll.ScrollBarImageColor3 = Color3.fromRGB(255,25,45)
 Scroll.Parent = Main
 
 local Layout = Instance.new("UIListLayout")
 Layout.Padding = UDim.new(0,8)
 Layout.Parent = Scroll
 
-local function CreateButton(text,icon,callback)
+--========================================================--
+-- BUTTON FUNCTION
+--========================================================--
+
+local function CreateButton(Text,Icon,Callback)
 
 	local Button = Instance.new("TextButton")
+
 	Button.Size = UDim2.new(1,-6,0,55)
-	Button.BackgroundColor3 = Color3.fromRGB(27,27,33)
+	Button.BackgroundColor3 = Color3.fromRGB(27,27,34)
 	Button.BorderSizePixel = 0
-	Button.Text = icon.."   "..text
+	Button.Text = Icon.."   "..Text
 	Button.TextColor3 = Color3.new(1,1,1)
 	Button.Font = Enum.Font.GothamBold
 	Button.TextSize = 15
@@ -138,7 +147,7 @@ local function CreateButton(text,icon,callback)
 	Button.Parent = Scroll
 
 	local Corner = Instance.new("UICorner")
-	Corner.CornerRadius = UDim.new(0,13)
+	Corner.CornerRadius = UDim.new(0,14)
 	Corner.Parent = Button
 
 	local Stroke = Instance.new("UIStroke")
@@ -146,139 +155,255 @@ local function CreateButton(text,icon,callback)
 	Stroke.Parent = Button
 
 	Button.Activated:Connect(function()
-		callback(Button,Stroke)
+		Callback(Button,Stroke)
 	end)
 
+	return Button
 end
 
 local function Toggle(Button,Stroke,Enabled,Name)
 
 	if Enabled then
+
 		Button.Text = Name.." • AÇIK"
-		Button.BackgroundColor3 = Color3.fromRGB(130,0,20)
-		Stroke.Color = Color3.fromRGB(255,30,45)
+		Button.BackgroundColor3 =
+			Color3.fromRGB(125,0,20)
+
+		Stroke.Color =
+			Color3.fromRGB(255,30,45)
+
 	else
+
 		Button.Text = Name.." • KAPALI"
-		Button.BackgroundColor3 = Color3.fromRGB(27,27,33)
-		Stroke.Color = Color3.fromRGB(65,65,75)
+		Button.BackgroundColor3 =
+			Color3.fromRGB(27,27,34)
+
+		Stroke.Color =
+			Color3.fromRGB(65,65,75)
+
 	end
 
 end
 
---==================================================
--- ÖLÜMSÜZLÜK
---==================================================
+--========================================================--
+-- GOD
+--========================================================--
 
-CreateButton("Ölümsüzlük • KAPALI","☠",function(Button,Stroke)
+CreateButton(
+	"Ölümsüzlük • KAPALI",
+	"❤️",
+	function(Button,Stroke)
 
-	State.God = not State.God
+		Settings.God = not Settings.God
 
-	Toggle(
-		Button,
-		Stroke,
-		State.God,
-		"☠ Ölümsüzlük"
-	)
+		Toggle(
+			Button,
+			Stroke,
+			Settings.God,
+			"❤️ Ölümsüzlük"
+		)
 
-	if State.God and Humanoid then
-		Humanoid.MaxHealth = 100
-		Humanoid.Health = 100
 	end
+)
 
-end)
+--========================================================--
+-- SPEED
+--========================================================--
 
---==================================================
--- SÜPER HIZ
---==================================================
+CreateButton(
+	"Süper Hız • KAPALI",
+	"⚡",
+	function(Button,Stroke)
 
-CreateButton("Süper Hız • KAPALI","⚡",function(Button,Stroke)
+		Settings.Speed = not Settings.Speed
 
-	State.Speed = not State.Speed
+		Toggle(
+			Button,
+			Stroke,
+			Settings.Speed,
+			"⚡ Süper Hız"
+		)
 
-	Toggle(
-		Button,
-		Stroke,
-		State.Speed,
-		"⚡ Süper Hız"
-	)
+	end
+)
 
-end)
+--========================================================--
+-- JUMP
+--========================================================--
 
---==================================================
--- SÜPER ZIPLAMA
---==================================================
+CreateButton(
+	"Yüksek Zıplama • KAPALI",
+	"🦘",
+	function(Button,Stroke)
 
-CreateButton("Süper Zıplama • KAPALI","🦘",function(Button,Stroke)
+		Settings.Jump = not Settings.Jump
 
-	State.Jump = not State.Jump
+		Toggle(
+			Button,
+			Stroke,
+			Settings.Jump,
+			"🦘 Yüksek Zıplama"
+		)
 
-	Toggle(
-		Button,
-		Stroke,
-		State.Jump,
-		"🦘 Süper Zıplama"
-	)
+	end
+)
 
-end)
+--========================================================--
+-- INFINITE JUMP
+--========================================================--
 
---==================================================
+CreateButton(
+	"Sonsuz Zıplama • KAPALI",
+	"♾️",
+	function(Button,Stroke)
+
+		Settings.InfiniteJump =
+			not Settings.InfiniteJump
+
+		Toggle(
+			Button,
+			Stroke,
+			Settings.InfiniteJump,
+			"♾️ Sonsuz Zıplama"
+		)
+
+	end
+)
+
+--========================================================--
 -- FLY
---==================================================
+--========================================================--
 
-CreateButton("Mobil Fly • KAPALI","🚀",function(Button,Stroke)
+CreateButton(
+	"Mobil Fly • KAPALI",
+	"🚀",
+	function(Button,Stroke)
 
-	State.Fly = not State.Fly
+		Settings.Fly =
+			not Settings.Fly
 
-	Toggle(
-		Button,
-		Stroke,
-		State.Fly,
-		"🚀 Mobil Fly"
-	)
+		Toggle(
+			Button,
+			Stroke,
+			Settings.Fly,
+			"🚀 Mobil Fly"
+		)
 
-	if not State.Fly and Root then
-		Root.AssemblyLinearVelocity = Vector3.zero
+		if not Settings.Fly and Root then
+			Root.AssemblyLinearVelocity =
+				Vector3.zero
+		end
+
 	end
+)
 
-end)
-
---==================================================
+--========================================================--
 -- HOVER
---==================================================
+--========================================================--
 
-CreateButton("Hover • KAPALI","🛑",function(Button,Stroke)
+CreateButton(
+	"Hover • KAPALI",
+	"🛑",
+	function(Button,Stroke)
 
-	State.Hover = not State.Hover
+		Settings.Hover =
+			not Settings.Hover
 
-	Toggle(
-		Button,
-		Stroke,
-		State.Hover,
-		"🛑 Hover"
-	)
+		Toggle(
+			Button,
+			Stroke,
+			Settings.Hover,
+			"🛑 Hover"
+		)
 
-end)
+	end
+)
 
---==================================================
+--========================================================--
 -- NOCLIP
---==================================================
+--========================================================--
 
-CreateButton("Noclip • KAPALI","👻",function(Button,Stroke)
+CreateButton(
+	"Noclip • KAPALI",
+	"👻",
+	function(Button,Stroke)
 
-	State.Noclip = not State.Noclip
+		Settings.Noclip =
+			not Settings.Noclip
 
-	Toggle(
-		Button,
-		Stroke,
-		State.Noclip,
-		"👻 Noclip"
-	)
+		Toggle(
+			Button,
+			Stroke,
+			Settings.Noclip,
+			"👻 Noclip"
+		)
 
-end)
+	end
+)
 
---==================================================
+--========================================================--
+-- FULLBRIGHT
+--========================================================--
+
+CreateButton(
+	"FullBright • KAPALI",
+	"☀️",
+	function(Button,Stroke)
+
+		Settings.FullBright =
+			not Settings.FullBright
+
+		Toggle(
+			Button,
+			Stroke,
+			Settings.FullBright,
+			"☀️ FullBright"
+		)
+
+	end
+)
+
+--========================================================--
+-- SPRINT
+--========================================================--
+
+CreateButton(
+	"Sprint • KAPALI",
+	"🏃",
+	function(Button,Stroke)
+
+		Settings.Sprint =
+			not Settings.Sprint
+
+		Toggle(
+			Button,
+			Stroke,
+			Settings.Sprint,
+			"🏃 Sprint"
+		)
+
+	end
+)
+
+--========================================================--
+-- RESPAWN
+--========================================================--
+
+CreateButton(
+	"Respawn",
+	"🔄",
+	function()
+
+		if Humanoid then
+			Humanoid.Health = 0
+		end
+
+	end
+)
+
+--========================================================--
 -- FLY JOYSTICK
---==================================================
+--========================================================--
 
 local FlyGui = Instance.new("Frame")
 FlyGui.Size = UDim2.fromOffset(190,190)
@@ -292,7 +417,7 @@ local Base = Instance.new("Frame")
 Base.Size = UDim2.fromOffset(160,160)
 Base.Position = UDim2.fromOffset(15,15)
 Base.BackgroundColor3 = Color3.fromRGB(30,30,38)
-Base.BackgroundTransparency = .12
+Base.BackgroundTransparency = .1
 Base.ZIndex = 501
 Base.Parent = FlyGui
 
@@ -360,8 +485,10 @@ end
 
 Base.InputBegan:Connect(function(Input)
 
-	if Input.UserInputType == Enum.UserInputType.Touch
-	or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if Input.UserInputType ==
+		Enum.UserInputType.Touch
+		or Input.UserInputType ==
+		Enum.UserInputType.MouseButton1 then
 
 		JoystickDragging = true
 		UpdateJoystick(Input.Position)
@@ -372,14 +499,16 @@ end)
 
 UIS.InputChanged:Connect(function(Input)
 
-	if JoystickDragging then
+	if not JoystickDragging then
+		return
+	end
 
-		if Input.UserInputType == Enum.UserInputType.Touch
-		or Input.UserInputType == Enum.UserInputType.MouseMovement then
+	if Input.UserInputType ==
+		Enum.UserInputType.Touch
+		or Input.UserInputType ==
+		Enum.UserInputType.MouseMovement then
 
-			UpdateJoystick(Input.Position)
-
-		end
+		UpdateJoystick(Input.Position)
 
 	end
 
@@ -387,11 +516,15 @@ end)
 
 UIS.InputEnded:Connect(function(Input)
 
-	if Input.UserInputType == Enum.UserInputType.Touch
-	or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if Input.UserInputType ==
+		Enum.UserInputType.Touch
+		or Input.UserInputType ==
+		Enum.UserInputType.MouseButton1 then
 
 		JoystickDragging = false
-		JoystickVector = Vector2.zero
+
+		JoystickVector =
+			Vector2.zero
 
 		Stick.Position =
 			UDim2.new(.5,-32.5,.5,-32.5)
@@ -400,16 +533,15 @@ UIS.InputEnded:Connect(function(Input)
 
 end)
 
---==================================================
--- SÜRÜKLENEBİLİR AÇ/KAPAT
---==================================================
+--========================================================--
+-- MOBİL AÇ/KAPAT
+--========================================================--
 
 local ToggleButton = Instance.new("TextButton")
 
-ToggleButton.Name = "ArdaHubToggle"
-ToggleButton.Size = UDim2.fromOffset(68,68)
+ToggleButton.Size =
+	UDim2.fromOffset(68,68)
 
--- Başlangıç konumu
 ToggleButton.Position =
 	UDim2.new(1,-85,0,25)
 
@@ -429,8 +561,6 @@ ToggleButton.Font =
 	Enum.Font.GothamBlack
 
 ToggleButton.ZIndex = 1000
-ToggleButton.Active = true
-ToggleButton.Selectable = true
 ToggleButton.Parent = Gui
 
 local ToggleCorner = Instance.new("UICorner")
@@ -443,7 +573,6 @@ ToggleStroke.Thickness = 3
 ToggleStroke.Parent = ToggleButton
 
 local HubOpen = true
-
 local ToggleDragging = false
 local ToggleMoved = false
 local ToggleStart
@@ -451,14 +580,19 @@ local ToggleStartPosition
 
 ToggleButton.InputBegan:Connect(function(Input)
 
-	if Input.UserInputType == Enum.UserInputType.Touch
-	or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if Input.UserInputType ==
+		Enum.UserInputType.Touch
+		or Input.UserInputType ==
+		Enum.UserInputType.MouseButton1 then
 
 		ToggleDragging = true
 		ToggleMoved = false
 
-		ToggleStart = Input.Position
-		ToggleStartPosition = ToggleButton.Position
+		ToggleStart =
+			Input.Position
+
+		ToggleStartPosition =
+			ToggleButton.Position
 
 	end
 
@@ -470,8 +604,10 @@ UIS.InputChanged:Connect(function(Input)
 		return
 	end
 
-	if Input.UserInputType == Enum.UserInputType.Touch
-	or Input.UserInputType == Enum.UserInputType.MouseMovement then
+	if Input.UserInputType ==
+		Enum.UserInputType.Touch
+		or Input.UserInputType ==
+		Enum.UserInputType.MouseMovement then
 
 		local Delta =
 			Input.Position - ToggleStart
@@ -494,12 +630,15 @@ end)
 
 UIS.InputEnded:Connect(function(Input)
 
-	if Input.UserInputType == Enum.UserInputType.Touch
-	or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+	if Input.UserInputType ==
+		Enum.UserInputType.Touch
+		or Input.UserInputType ==
+		Enum.UserInputType.MouseButton1 then
 
 		if ToggleDragging and not ToggleMoved then
 
 			HubOpen = not HubOpen
+
 			Main.Visible = HubOpen
 
 			if HubOpen then
@@ -516,9 +655,26 @@ UIS.InputEnded:Connect(function(Input)
 
 end)
 
---==================================================
+--========================================================--
+-- INFINITE JUMP
+--========================================================--
+
+UIS.JumpRequest:Connect(function()
+
+	if Settings.InfiniteJump
+		and Humanoid then
+
+		Humanoid:ChangeState(
+			Enum.HumanoidStateType.Jumping
+		)
+
+	end
+
+end)
+
+--========================================================--
 -- ANA DÖNGÜ
---==================================================
+--========================================================--
 
 RunService.Heartbeat:Connect(function()
 
@@ -526,8 +682,8 @@ RunService.Heartbeat:Connect(function()
 		return
 	end
 
-	-- Ölümsüzlük
-	if State.God then
+	-- GOD
+	if Settings.God then
 
 		Humanoid.MaxHealth = 100
 
@@ -537,18 +693,26 @@ RunService.Heartbeat:Connect(function()
 
 	end
 
-	-- Hız
-	Humanoid.WalkSpeed =
-		State.Speed and 100 or 16
+	-- SPEED
+	if Settings.Sprint then
+		Humanoid.WalkSpeed = 50
+	elseif Settings.Speed then
+		Humanoid.WalkSpeed = 100
+	else
+		Humanoid.WalkSpeed = WalkSpeed
+	end
 
-	-- Zıplama
+	-- JUMP
 	Humanoid.UseJumpPower = true
 
-	Humanoid.JumpPower =
-		State.Jump and 150 or 50
+	if Settings.Jump then
+		Humanoid.JumpPower = 150
+	else
+		Humanoid.JumpPower = JumpPower
+	end
 
-	-- Noclip
-	if State.Noclip and Character then
+	-- NOCLIP
+	if Settings.Noclip and Character then
 
 		for _,Object in ipairs(
 			Character:GetDescendants()
@@ -562,8 +726,18 @@ RunService.Heartbeat:Connect(function()
 
 	end
 
-	-- Fly
-	if State.Fly and Root then
+	-- FULLBRIGHT
+	if Settings.FullBright then
+
+		Lighting.Brightness = 3
+		Lighting.ClockTime = 14
+		Lighting.FogEnd = 100000
+		Lighting.GlobalShadows = false
+
+	end
+
+	-- FLY
+	if Settings.Fly and Root then
 
 		FlyGui.Visible = true
 
@@ -583,7 +757,7 @@ RunService.Heartbeat:Connect(function()
 
 		end
 
-		if State.Hover then
+		if Settings.Hover then
 
 			Root.AssemblyLinearVelocity =
 				Vector3.zero
@@ -603,11 +777,14 @@ RunService.Heartbeat:Connect(function()
 	else
 
 		FlyGui.Visible = false
-		JoystickVector = Vector2.zero
 
 	end
 
 end)
+
+--========================================================--
+-- SCROLL SIZE
+--========================================================--
 
 Layout:GetPropertyChangedSignal(
 	"AbsoluteContentSize"
