@@ -1,11 +1,17 @@
+-- ARDA HUB MOBILE V8
+-- Roblox Studio / private test oyunu
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 
-local player = Players.LocalPlayer
-local char, hum, root
+local Player = Players.LocalPlayer
 
-local state = {
+local Character
+local Humanoid
+local Root
+
+local State = {
 	God = false,
 	Fly = false,
 	Speed = false,
@@ -14,321 +20,603 @@ local state = {
 	Hover = false
 }
 
-local flySpeed = 80
-local joystick = Vector2.zero
-local dragging = false
+local FlySpeed = 80
 
-local function setupCharacter(c)
-	char = c
-	hum = c:WaitForChild("Humanoid")
-	root = c:WaitForChild("HumanoidRootPart")
+--==================================================
+-- CHARACTER
+--==================================================
+
+local function LoadCharacter(char)
+	Character = char
+	Humanoid = char:WaitForChild("Humanoid")
+	Root = char:WaitForChild("HumanoidRootPart")
 end
 
-if player.Character then
-	setupCharacter(player.Character)
+if Player.Character then
+	LoadCharacter(Player.Character)
 end
 
-player.CharacterAdded:Connect(function(c)
-	task.wait(.2)
-	setupCharacter(c)
+Player.CharacterAdded:Connect(function(char)
+	task.wait(0.2)
+	LoadCharacter(char)
 end)
 
+--==================================================
 -- GUI
-local gui = Instance.new("ScreenGui")
-gui.Name = "ArdaHub"
-gui.ResetOnSpawn = false
-gui.IgnoreGuiInset = true
-gui.Parent = player:WaitForChild("PlayerGui")
+--==================================================
 
-local main = Instance.new("Frame")
-main.Size = UDim2.fromOffset(350,470)
-main.Position = UDim2.new(.5,-175,.5,-235)
-main.BackgroundColor3 = Color3.fromRGB(10,10,14)
-main.BorderSizePixel = 0
-main.Parent = gui
+local Gui = Instance.new("ScreenGui")
+Gui.Name = "ArdaHubMobile"
+Gui.ResetOnSpawn = false
+Gui.IgnoreGuiInset = true
+Gui.DisplayOrder = 999
+Gui.Parent = Player:WaitForChild("PlayerGui")
 
-Instance.new("UICorner",main).CornerRadius = UDim.new(0,20)
+--==================================================
+-- ANA PANEL
+--==================================================
 
-local outline = Instance.new("UIStroke")
-outline.Color = Color3.fromRGB(255,25,45)
-outline.Thickness = 2
-outline.Parent = main
+local Main = Instance.new("Frame")
+Main.Size = UDim2.fromOffset(350,470)
+Main.Position = UDim2.new(.5,-175,.5,-235)
+Main.BackgroundColor3 = Color3.fromRGB(10,10,14)
+Main.BorderSizePixel = 0
+Main.ZIndex = 10
+Main.Parent = Gui
 
--- Header
-local header = Instance.new("Frame")
-header.Size = UDim2.new(1,0,0,75)
-header.BackgroundColor3 = Color3.fromRGB(130,0,20)
-header.BorderSizePixel = 0
-header.Parent = main
-Instance.new("UICorner",header).CornerRadius = UDim.new(0,20)
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0,20)
+MainCorner.Parent = Main
 
-local title = Instance.new("TextLabel")
-title.BackgroundTransparency = 1
-title.Position = UDim2.fromOffset(18,8)
-title.Size = UDim2.new(1,-70,0,35)
-title.Text = "ARDA HUB"
-title.TextColor3 = Color3.new(1,1,1)
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 28
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = header
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(255,25,45)
+MainStroke.Thickness = 2
+MainStroke.Parent = Main
 
-local close = Instance.new("TextButton")
-close.Size = UDim2.fromOffset(42,42)
-close.Position = UDim2.new(1,-52,0,12)
-close.BackgroundColor3 = Color3.fromRGB(90,0,15)
-close.Text = "×"
-close.TextColor3 = Color3.new(1,1,1)
-close.TextSize = 28
-close.Font = Enum.Font.GothamBlack
-close.Parent = header
-Instance.new("UICorner",close).CornerRadius = UDim.new(1,0)
+-- HEADER
 
--- Menü
-local scroll = Instance.new("ScrollingFrame")
-scroll.Position = UDim2.fromOffset(12,85)
-scroll.Size = UDim2.new(1,-24,1,-97)
-scroll.BackgroundTransparency = 1
-scroll.BorderSizePixel = 0
-scroll.ScrollBarThickness = 4
-scroll.Parent = main
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1,0,0,75)
+Header.BackgroundColor3 = Color3.fromRGB(130,0,20)
+Header.BorderSizePixel = 0
+Header.Parent = Main
 
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0,8)
-layout.Parent = scroll
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0,20)
+HeaderCorner.Parent = Header
 
-local function makeButton(text,icon,callback)
-	local b = Instance.new("TextButton")
-	b.Size = UDim2.new(1,-6,0,55)
-	b.BackgroundColor3 = Color3.fromRGB(27,27,33)
-	b.BorderSizePixel = 0
-	b.Text = icon.."   "..text
-	b.TextColor3 = Color3.new(1,1,1)
-	b.Font = Enum.Font.GothamBold
-	b.TextSize = 15
-	b.AutoButtonColor = false
-	b.Parent = scroll
+local Title = Instance.new("TextLabel")
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.fromOffset(18,8)
+Title.Size = UDim2.new(1,-36,0,35)
+Title.Text = "ARDA HUB"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 28
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Header
 
-	Instance.new("UICorner",b).CornerRadius = UDim.new(0,13)
+local Version = Instance.new("TextLabel")
+Version.BackgroundTransparency = 1
+Version.Position = UDim2.fromOffset(20,43)
+Version.Size = UDim2.new(1,-40,0,20)
+Version.Text = "MOBILE • V8"
+Version.TextColor3 = Color3.fromRGB(255,190,195)
+Version.Font = Enum.Font.GothamBold
+Version.TextSize = 11
+Version.TextXAlignment = Enum.TextXAlignment.Left
+Version.Parent = Header
 
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = Color3.fromRGB(65,65,75)
-	stroke.Parent = b
+--==================================================
+-- SCROLL
+--==================================================
 
-	b.Activated:Connect(function()
-		callback(b,stroke)
+local Scroll = Instance.new("ScrollingFrame")
+Scroll.Position = UDim2.fromOffset(12,85)
+Scroll.Size = UDim2.new(1,-24,1,-97)
+Scroll.BackgroundTransparency = 1
+Scroll.BorderSizePixel = 0
+Scroll.ScrollBarThickness = 4
+Scroll.ScrollBarImageColor3 = Color3.fromRGB(255,30,45)
+Scroll.Parent = Main
+
+local Layout = Instance.new("UIListLayout")
+Layout.Padding = UDim.new(0,8)
+Layout.Parent = Scroll
+
+local function CreateButton(text,icon,callback)
+
+	local Button = Instance.new("TextButton")
+	Button.Size = UDim2.new(1,-6,0,55)
+	Button.BackgroundColor3 = Color3.fromRGB(27,27,33)
+	Button.BorderSizePixel = 0
+	Button.Text = icon.."   "..text
+	Button.TextColor3 = Color3.new(1,1,1)
+	Button.Font = Enum.Font.GothamBold
+	Button.TextSize = 15
+	Button.AutoButtonColor = false
+	Button.Parent = Scroll
+
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0,13)
+	Corner.Parent = Button
+
+	local Stroke = Instance.new("UIStroke")
+	Stroke.Color = Color3.fromRGB(65,65,75)
+	Stroke.Parent = Button
+
+	Button.Activated:Connect(function()
+		callback(Button,Stroke)
 	end)
+
 end
 
-local function toggle(b,s,on,name)
-	if on then
-		b.Text = name.." • AÇIK"
-		b.BackgroundColor3 = Color3.fromRGB(130,0,20)
-		s.Color = Color3.fromRGB(255,30,45)
+local function Toggle(Button,Stroke,Enabled,Name)
+
+	if Enabled then
+		Button.Text = Name.." • AÇIK"
+		Button.BackgroundColor3 = Color3.fromRGB(130,0,20)
+		Stroke.Color = Color3.fromRGB(255,30,45)
 	else
-		b.Text = name.." • KAPALI"
-		b.BackgroundColor3 = Color3.fromRGB(27,27,33)
-		s.Color = Color3.fromRGB(65,65,75)
+		Button.Text = Name.." • KAPALI"
+		Button.BackgroundColor3 = Color3.fromRGB(27,27,33)
+		Stroke.Color = Color3.fromRGB(65,65,75)
 	end
+
 end
 
--- Ölümsüzlük
-makeButton("Ölümsüzlük • KAPALI","☠",function(b,s)
-	state.God = not state.God
-	toggle(b,s,state.God,"☠ Ölümsüzlük")
+--==================================================
+-- ÖLÜMSÜZLÜK
+--==================================================
 
-	if state.God and hum then
-		hum.MaxHealth = 100
-		hum.Health = 100
-	end
-end)
+CreateButton("Ölümsüzlük • KAPALI","☠",function(Button,Stroke)
 
--- Hız
-makeButton("Süper Hız • KAPALI","⚡",function(b,s)
-	state.Speed = not state.Speed
-	toggle(b,s,state.Speed,"⚡ Süper Hız")
-end)
+	State.God = not State.God
 
--- Jump
-makeButton("Süper Zıplama • KAPALI","🦘",function(b,s)
-	state.Jump = not state.Jump
-	toggle(b,s,state.Jump,"🦘 Süper Zıplama")
-end)
-
--- Fly
-makeButton("Mobil Fly • KAPALI","🚀",function(b,s)
-	state.Fly = not state.Fly
-	toggle(b,s,state.Fly,"🚀 Mobil Fly")
-
-	if not state.Fly and root then
-		root.AssemblyLinearVelocity = Vector3.zero
-	end
-end)
-
--- Hover
-makeButton("Hover • KAPALI","🛑",function(b,s)
-	state.Hover = not state.Hover
-	toggle(b,s,state.Hover,"🛑 Hover")
-end)
-
--- Noclip
-makeButton("Noclip • KAPALI","👻",function(b,s)
-	state.Noclip = not state.Noclip
-	toggle(b,s,state.Noclip,"👻 Noclip")
-end)
-
--- Fly joystick
-local flyGui = Instance.new("Frame")
-flyGui.Size = UDim2.fromOffset(180,180)
-flyGui.Position = UDim2.new(0,20,1,-205)
-flyGui.BackgroundTransparency = 1
-flyGui.Visible = false
-flyGui.Parent = gui
-
-local base = Instance.new("Frame")
-base.Size = UDim2.fromOffset(150,150)
-base.Position = UDim2.fromOffset(15,15)
-base.BackgroundColor3 = Color3.fromRGB(30,30,38)
-base.BackgroundTransparency = .15
-base.Parent = flyGui
-Instance.new("UICorner",base).CornerRadius = UDim.new(1,0)
-
-local bs = Instance.new("UIStroke")
-bs.Color = Color3.fromRGB(255,30,45)
-bs.Thickness = 2
-bs.Parent = base
-
-local stick = Instance.new("Frame")
-stick.Size = UDim2.fromOffset(62,62)
-stick.Position = UDim2.new(.5,-31,.5,-31)
-stick.BackgroundColor3 = Color3.fromRGB(150,0,25)
-stick.Parent = base
-Instance.new("UICorner",stick).CornerRadius = UDim.new(1,0)
-
-local function updateJoystick(pos)
-	local center = base.AbsolutePosition + base.AbsoluteSize/2
-	local delta = Vector2.new(pos.X-center.X,pos.Y-center.Y)
-	local radius = 43
-
-	if delta.Magnitude > radius then
-		delta = delta.Unit * radius
-	end
-
-	joystick = Vector2.new(delta.X/radius,delta.Y/radius)
-
-	stick.Position = UDim2.new(
-		.5,delta.X-31,
-		.5,delta.Y-31
+	Toggle(
+		Button,
+		Stroke,
+		State.God,
+		"☠ Ölümsüzlük"
 	)
+
+	if State.God and Humanoid then
+		Humanoid.MaxHealth = 100
+		Humanoid.Health = 100
+	end
+
+end)
+
+--==================================================
+-- SÜPER HIZ
+--==================================================
+
+CreateButton("Süper Hız • KAPALI","⚡",function(Button,Stroke)
+
+	State.Speed = not State.Speed
+
+	Toggle(
+		Button,
+		Stroke,
+		State.Speed,
+		"⚡ Süper Hız"
+	)
+
+end)
+
+--==================================================
+-- SÜPER ZIPLAMA
+--==================================================
+
+CreateButton("Süper Zıplama • KAPALI","🦘",function(Button,Stroke)
+
+	State.Jump = not State.Jump
+
+	Toggle(
+		Button,
+		Stroke,
+		State.Jump,
+		"🦘 Süper Zıplama"
+	)
+
+end)
+
+--==================================================
+-- FLY
+--==================================================
+
+CreateButton("Mobil Fly • KAPALI","🚀",function(Button,Stroke)
+
+	State.Fly = not State.Fly
+
+	Toggle(
+		Button,
+		Stroke,
+		State.Fly,
+		"🚀 Mobil Fly"
+	)
+
+	if not State.Fly and Root then
+		Root.AssemblyLinearVelocity = Vector3.zero
+	end
+
+end)
+
+--==================================================
+-- HOVER
+--==================================================
+
+CreateButton("Hover • KAPALI","🛑",function(Button,Stroke)
+
+	State.Hover = not State.Hover
+
+	Toggle(
+		Button,
+		Stroke,
+		State.Hover,
+		"🛑 Hover"
+	)
+
+end)
+
+--==================================================
+-- NOCLIP
+--==================================================
+
+CreateButton("Noclip • KAPALI","👻",function(Button,Stroke)
+
+	State.Noclip = not State.Noclip
+
+	Toggle(
+		Button,
+		Stroke,
+		State.Noclip,
+		"👻 Noclip"
+	)
+
+end)
+
+--==================================================
+-- FLY JOYSTICK
+--==================================================
+
+local FlyGui = Instance.new("Frame")
+FlyGui.Size = UDim2.fromOffset(190,190)
+FlyGui.Position = UDim2.new(0,18,1,-215)
+FlyGui.BackgroundTransparency = 1
+FlyGui.Visible = false
+FlyGui.ZIndex = 500
+FlyGui.Parent = Gui
+
+local Base = Instance.new("Frame")
+Base.Size = UDim2.fromOffset(160,160)
+Base.Position = UDim2.fromOffset(15,15)
+Base.BackgroundColor3 = Color3.fromRGB(30,30,38)
+Base.BackgroundTransparency = .12
+Base.ZIndex = 501
+Base.Parent = FlyGui
+
+local BaseCorner = Instance.new("UICorner")
+BaseCorner.CornerRadius = UDim.new(1,0)
+BaseCorner.Parent = Base
+
+local BaseStroke = Instance.new("UIStroke")
+BaseStroke.Color = Color3.fromRGB(255,30,45)
+BaseStroke.Thickness = 3
+BaseStroke.Parent = Base
+
+local Stick = Instance.new("Frame")
+Stick.Size = UDim2.fromOffset(65,65)
+Stick.Position = UDim2.new(.5,-32.5,.5,-32.5)
+Stick.BackgroundColor3 = Color3.fromRGB(150,0,25)
+Stick.ZIndex = 502
+Stick.Parent = Base
+
+local StickCorner = Instance.new("UICorner")
+StickCorner.CornerRadius = UDim.new(1,0)
+StickCorner.Parent = Stick
+
+local StickStroke = Instance.new("UIStroke")
+StickStroke.Color = Color3.fromRGB(255,50,65)
+StickStroke.Thickness = 2
+StickStroke.Parent = Stick
+
+local JoystickVector = Vector2.zero
+local JoystickDragging = false
+
+local function UpdateJoystick(Position)
+
+	local Center =
+		Base.AbsolutePosition
+		+ Base.AbsoluteSize / 2
+
+	local Delta =
+		Vector2.new(
+			Position.X - Center.X,
+			Position.Y - Center.Y
+		)
+
+	local Radius = 45
+
+	if Delta.Magnitude > Radius then
+		Delta = Delta.Unit * Radius
+	end
+
+	JoystickVector =
+		Vector2.new(
+			Delta.X / Radius,
+			Delta.Y / Radius
+		)
+
+	Stick.Position =
+		UDim2.new(
+			.5,
+			Delta.X - 32.5,
+			.5,
+			Delta.Y - 32.5
+		)
+
 end
 
-base.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch
-	or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		updateJoystick(input.Position)
+Base.InputBegan:Connect(function(Input)
+
+	if Input.UserInputType == Enum.UserInputType.Touch
+	or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+		JoystickDragging = true
+		UpdateJoystick(Input.Position)
+
 	end
+
 end)
 
-UIS.InputChanged:Connect(function(input)
-	if dragging and (
-		input.UserInputType == Enum.UserInputType.Touch
-		or input.UserInputType == Enum.UserInputType.MouseMovement
-	) then
-		updateJoystick(input.Position)
+UIS.InputChanged:Connect(function(Input)
+
+	if JoystickDragging then
+
+		if Input.UserInputType == Enum.UserInputType.Touch
+		or Input.UserInputType == Enum.UserInputType.MouseMovement then
+
+			UpdateJoystick(Input.Position)
+
+		end
+
 	end
+
 end)
 
-UIS.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch
-	or input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = false
-		joystick = Vector2.zero
-		stick.Position = UDim2.new(.5,-31,.5,-31)
+UIS.InputEnded:Connect(function(Input)
+
+	if Input.UserInputType == Enum.UserInputType.Touch
+	or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+		JoystickDragging = false
+		JoystickVector = Vector2.zero
+
+		Stick.Position =
+			UDim2.new(.5,-32.5,.5,-32.5)
+
 	end
+
 end)
 
--- Mobil aç/kapat
-local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.fromOffset(64,64)
-toggleButton.Position = UDim2.new(1,-80,1,-85)
-toggleButton.BackgroundColor3 = Color3.fromRGB(130,0,20)
-toggleButton.Text = "×"
-toggleButton.TextColor3 = Color3.new(1,1,1)
-toggleButton.TextSize = 28
-toggleButton.Font = Enum.Font.GothamBlack
-toggleButton.ZIndex = 100
-toggleButton.Parent = gui
-Instance.new("UICorner",toggleButton).CornerRadius = UDim.new(1,0)
+--==================================================
+-- SÜRÜKLENEBİLİR AÇ/KAPAT
+--==================================================
 
-local hubOpen = true
+local ToggleButton = Instance.new("TextButton")
 
-local function setHub(open)
-	hubOpen = open
-	main.Visible = open
-	toggleButton.Text = open and "×" or "☰"
-end
+ToggleButton.Name = "ArdaHubToggle"
+ToggleButton.Size = UDim2.fromOffset(68,68)
 
-toggleButton.Activated:Connect(function()
-	setHub(not hubOpen)
+-- Başlangıç konumu
+ToggleButton.Position =
+	UDim2.new(1,-85,0,25)
+
+ToggleButton.BackgroundColor3 =
+	Color3.fromRGB(140,0,20)
+
+ToggleButton.BorderSizePixel = 0
+
+ToggleButton.Text = "×"
+
+ToggleButton.TextColor3 =
+	Color3.new(1,1,1)
+
+ToggleButton.TextSize = 32
+
+ToggleButton.Font =
+	Enum.Font.GothamBlack
+
+ToggleButton.ZIndex = 1000
+ToggleButton.Active = true
+ToggleButton.Selectable = true
+ToggleButton.Parent = Gui
+
+local ToggleCorner = Instance.new("UICorner")
+ToggleCorner.CornerRadius = UDim.new(1,0)
+ToggleCorner.Parent = ToggleButton
+
+local ToggleStroke = Instance.new("UIStroke")
+ToggleStroke.Color = Color3.fromRGB(255,40,55)
+ToggleStroke.Thickness = 3
+ToggleStroke.Parent = ToggleButton
+
+local HubOpen = true
+
+local ToggleDragging = false
+local ToggleMoved = false
+local ToggleStart
+local ToggleStartPosition
+
+ToggleButton.InputBegan:Connect(function(Input)
+
+	if Input.UserInputType == Enum.UserInputType.Touch
+	or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+		ToggleDragging = true
+		ToggleMoved = false
+
+		ToggleStart = Input.Position
+		ToggleStartPosition = ToggleButton.Position
+
+	end
+
 end)
 
-close.Activated:Connect(function()
-	setHub(false)
-end)
+UIS.InputChanged:Connect(function(Input)
 
--- Ana döngü
-RunService.Heartbeat:Connect(function()
-
-	if not hum or not hum.Parent then
+	if not ToggleDragging then
 		return
 	end
 
-	-- Canı 100'de tut
-	if state.God then
-		hum.MaxHealth = 100
-		if hum.Health < 100 then
-			hum.Health = 100
+	if Input.UserInputType == Enum.UserInputType.Touch
+	or Input.UserInputType == Enum.UserInputType.MouseMovement then
+
+		local Delta =
+			Input.Position - ToggleStart
+
+		if Delta.Magnitude > 8 then
+			ToggleMoved = true
 		end
+
+		ToggleButton.Position =
+			UDim2.new(
+				ToggleStartPosition.X.Scale,
+				ToggleStartPosition.X.Offset + Delta.X,
+				ToggleStartPosition.Y.Scale,
+				ToggleStartPosition.Y.Offset + Delta.Y
+			)
+
 	end
 
-	hum.WalkSpeed = state.Speed and 100 or 16
-	hum.UseJumpPower = true
-	hum.JumpPower = state.Jump and 150 or 50
-
-	if state.Noclip and char then
-		for _,v in ipairs(char:GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.CanCollide = false
-			end
-		end
-	end
-
-	if state.Fly and root then
-		flyGui.Visible = true
-
-		local camera = workspace.CurrentCamera
-		local direction = Vector3.zero
-
-		if joystick.Magnitude > .05 then
-			direction =
-				camera.CFrame.LookVector * (-joystick.Y)
-				+ camera.CFrame.RightVector * joystick.X
-		end
-
-		if state.Hover then
-			root.AssemblyLinearVelocity = Vector3.zero
-		elseif direction.Magnitude > .05 then
-			root.AssemblyLinearVelocity = direction.Unit * flySpeed
-		else
-			root.AssemblyLinearVelocity = Vector3.zero
-		end
-	else
-		flyGui.Visible = false
-	end
 end)
 
-layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-	scroll.CanvasSize =
-		UDim2.fromOffset(0,layout.AbsoluteContentSize.Y+15)
+UIS.InputEnded:Connect(function(Input)
+
+	if Input.UserInputType == Enum.UserInputType.Touch
+	or Input.UserInputType == Enum.UserInputType.MouseButton1 then
+
+		if ToggleDragging and not ToggleMoved then
+
+			HubOpen = not HubOpen
+			Main.Visible = HubOpen
+
+			if HubOpen then
+				ToggleButton.Text = "×"
+			else
+				ToggleButton.Text = "☰"
+			end
+
+		end
+
+		ToggleDragging = false
+
+	end
+
+end)
+
+--==================================================
+-- ANA DÖNGÜ
+--==================================================
+
+RunService.Heartbeat:Connect(function()
+
+	if not Humanoid or not Humanoid.Parent then
+		return
+	end
+
+	-- Ölümsüzlük
+	if State.God then
+
+		Humanoid.MaxHealth = 100
+
+		if Humanoid.Health < 100 then
+			Humanoid.Health = 100
+		end
+
+	end
+
+	-- Hız
+	Humanoid.WalkSpeed =
+		State.Speed and 100 or 16
+
+	-- Zıplama
+	Humanoid.UseJumpPower = true
+
+	Humanoid.JumpPower =
+		State.Jump and 150 or 50
+
+	-- Noclip
+	if State.Noclip and Character then
+
+		for _,Object in ipairs(
+			Character:GetDescendants()
+		) do
+
+			if Object:IsA("BasePart") then
+				Object.CanCollide = false
+			end
+
+		end
+
+	end
+
+	-- Fly
+	if State.Fly and Root then
+
+		FlyGui.Visible = true
+
+		local Camera =
+			workspace.CurrentCamera
+
+		local Direction = Vector3.zero
+
+		if JoystickVector.Magnitude > .05 then
+
+			Direction =
+				Camera.CFrame.LookVector
+				* (-JoystickVector.Y)
+
+				+ Camera.CFrame.RightVector
+				* JoystickVector.X
+
+		end
+
+		if State.Hover then
+
+			Root.AssemblyLinearVelocity =
+				Vector3.zero
+
+		elseif Direction.Magnitude > .05 then
+
+			Root.AssemblyLinearVelocity =
+				Direction.Unit * FlySpeed
+
+		else
+
+			Root.AssemblyLinearVelocity =
+				Vector3.zero
+
+		end
+
+	else
+
+		FlyGui.Visible = false
+		JoystickVector = Vector2.zero
+
+	end
+
+end)
+
+Layout:GetPropertyChangedSignal(
+	"AbsoluteContentSize"
+):Connect(function()
+
+	Scroll.CanvasSize =
+		UDim2.fromOffset(
+			0,
+			Layout.AbsoluteContentSize.Y + 15
+		)
+
 end)
