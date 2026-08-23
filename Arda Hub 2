@@ -1,151 +1,602 @@
--- ARDA HUB V11 - MOBİL GUI TEST
+--==================================================
+-- ARDA HUB V12 - MOBILE
+--==================================================
 
 local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+
 local Player = Players.LocalPlayer
 
+--==================================================
+-- CHARACTER
+--==================================================
+
+local Character
+local Humanoid
+local Root
+
+local function CharacterLoaded(char)
+	Character = char
+	Humanoid = char:WaitForChild("Humanoid")
+	Root = char:WaitForChild("HumanoidRootPart")
+end
+
+if Player.Character then
+	CharacterLoaded(Player.Character)
+end
+
+Player.CharacterAdded:Connect(CharacterLoaded)
+
+--==================================================
+-- GUI
+--==================================================
+
 local Gui = Instance.new("ScreenGui")
-Gui.Name = "ArdaHubV11"
+Gui.Name = "ArdaHubV12"
 Gui.ResetOnSpawn = false
 Gui.IgnoreGuiInset = true
 Gui.DisplayOrder = 999999
+Gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 Gui.Parent = Player:WaitForChild("PlayerGui")
 
--- Aç/Kapat
-local Open = Instance.new("TextButton")
-Open.Size = UDim2.fromOffset(65,65)
-Open.Position = UDim2.new(1,-80,0,25)
-Open.BackgroundColor3 = Color3.fromRGB(180,0,30)
-Open.Text = "☰"
-Open.TextColor3 = Color3.new(1,1,1)
-Open.TextSize = 30
-Open.Font = Enum.Font.GothamBlack
-Open.ZIndex = 100
-Open.Parent = Gui
+--==================================================
+-- OPEN BUTTON
+--==================================================
 
-local oc = Instance.new("UICorner")
-oc.CornerRadius = UDim.new(1,0)
-oc.Parent = Open
+local OpenButton = Instance.new("TextButton")
 
--- Panel
-local Panel = Instance.new("Frame")
-Panel.Size = UDim2.new(0.86,0,0.72,0)
-Panel.Position = UDim2.new(0.07,0,0.14,0)
-Panel.BackgroundColor3 = Color3.fromRGB(12,12,18)
-Panel.BorderSizePixel = 0
-Panel.ZIndex = 10
-Panel.Parent = Gui
+OpenButton.Name = "OpenButton"
+OpenButton.Size = UDim2.fromOffset(68,68)
+OpenButton.Position = UDim2.new(1,-85,0,25)
 
-local pc = Instance.new("UICorner")
-pc.CornerRadius = UDim.new(0,20)
-pc.Parent = Panel
+OpenButton.BackgroundColor3 =
+	Color3.fromRGB(150,0,25)
 
-local ps = Instance.new("UIStroke")
-ps.Color = Color3.fromRGB(255,20,45)
-ps.Thickness = 3
-ps.Parent = Panel
+OpenButton.BorderSizePixel = 0
 
--- Başlık
+OpenButton.Text = "×"
+OpenButton.TextColor3 =
+	Color3.new(1,1,1)
+
+OpenButton.TextSize = 30
+OpenButton.Font = Enum.Font.GothamBlack
+
+OpenButton.ZIndex = 1000
+OpenButton.Parent = Gui
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(1,0)
+OpenCorner.Parent = OpenButton
+
+local OpenStroke = Instance.new("UIStroke")
+OpenStroke.Color =
+	Color3.fromRGB(255,40,60)
+
+OpenStroke.Thickness = 3
+OpenStroke.Parent = OpenButton
+
+--==================================================
+-- MAIN
+--==================================================
+
+local Main = Instance.new("Frame")
+
+Main.Name = "Main"
+Main.Size = UDim2.new(.86,0,.76,0)
+Main.Position = UDim2.new(.07,0,.12,0)
+
+Main.BackgroundColor3 =
+	Color3.fromRGB(10,10,15)
+
+Main.BorderSizePixel = 0
+Main.ZIndex = 50
+Main.Parent = Gui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius =
+	UDim.new(0,20)
+MainCorner.Parent = Main
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color =
+	Color3.fromRGB(255,25,45)
+
+MainStroke.Thickness = 3
+MainStroke.Parent = Main
+
+--==================================================
+-- HEADER
+--==================================================
+
+local Header = Instance.new("Frame")
+
+Header.Size =
+	UDim2.new(1,0,0,70)
+
+Header.BackgroundColor3 =
+	Color3.fromRGB(145,0,25)
+
+Header.BorderSizePixel = 0
+Header.ZIndex = 150
+Header.Parent = Main
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius =
+	UDim.new(0,20)
+
+HeaderCorner.Parent = Header
+
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1,0,0,65)
-Title.BackgroundColor3 = Color3.fromRGB(150,0,25)
-Title.Text = "ARDA HUB V11"
-Title.TextColor3 = Color3.new(1,1,1)
-Title.TextSize = 25
-Title.Font = Enum.Font.GothamBlack
-Title.ZIndex = 11
-Title.Parent = Panel
 
-local tc = Instance.new("UICorner")
-tc.CornerRadius = UDim.new(0,20)
-tc.Parent = Title
+Title.BackgroundTransparency = 1
+Title.Size =
+	UDim2.new(1,-20,1,0)
 
--- Buton alanı
+Title.Position =
+	UDim2.fromOffset(15,0)
+
+Title.Text =
+	"ARDA HUB"
+
+Title.TextColor3 =
+	Color3.new(1,1,1)
+
+Title.Font =
+	Enum.Font.GothamBlack
+
+Title.TextSize = 27
+
+Title.TextXAlignment =
+	Enum.TextXAlignment.Left
+
+Title.ZIndex = 151
+Title.Parent = Header
+
+--==================================================
+-- BUTTON LIST
+--==================================================
+
 local List = Instance.new("ScrollingFrame")
-List.Position = UDim2.fromOffset(10,75)
-List.Size = UDim2.new(1,-20,1,-85)
+
+List.Name = "Buttons"
+
+List.Position =
+	UDim2.fromOffset(10,80)
+
+List.Size =
+	UDim2.new(1,-20,1,-90)
+
 List.BackgroundTransparency = 1
 List.BorderSizePixel = 0
+
 List.ScrollBarThickness = 5
-List.ZIndex = 11
-List.Parent = Panel
+
+List.ScrollBarImageColor3 =
+	Color3.fromRGB(255,30,45)
+
+List.ZIndex = 100
+List.Parent = Main
 
 local Layout = Instance.new("UIListLayout")
-Layout.Padding = UDim.new(0,8)
+
+Layout.Padding =
+	UDim.new(0,8)
+
+Layout.HorizontalAlignment =
+	Enum.HorizontalAlignment.Center
+
 Layout.Parent = List
 
-local function Button(text)
+--==================================================
+-- BUTTON CREATOR
+--==================================================
 
-	local B = Instance.new("TextButton")
+local function CreateButton(name,icon,callback)
 
-	B.Size = UDim2.new(1,-5,0,55)
-	B.BackgroundColor3 = Color3.fromRGB(35,35,45)
-	B.BorderSizePixel = 0
-	B.Text = text.."  •  KAPALI"
-	B.TextColor3 = Color3.new(1,1,1)
-	B.TextSize = 16
-	B.Font = Enum.Font.GothamBold
-	B.ZIndex = 12
-	B.Parent = List
+	local Button = Instance.new("TextButton")
 
-	local C = Instance.new("UICorner")
-	C.CornerRadius = UDim.new(0,12)
-	C.Parent = B
+	Button.Name = name
 
-	B.Activated:Connect(function()
+	Button.Size =
+		UDim2.new(1,-5,0,55)
 
-		if B:GetAttribute("Enabled") then
+	Button.BackgroundColor3 =
+		Color3.fromRGB(30,30,38)
 
-			B:SetAttribute("Enabled",false)
-			B.Text = text.."  •  KAPALI"
-			B.BackgroundColor3 =
-				Color3.fromRGB(35,35,45)
+	Button.BorderSizePixel = 0
+
+	Button.Text =
+		icon.."   "..name.."  •  KAPALI"
+
+	Button.TextColor3 =
+		Color3.new(1,1,1)
+
+	Button.Font =
+		Enum.Font.GothamBold
+
+	Button.TextSize = 15
+
+	Button.AutoButtonColor = false
+
+	Button.ZIndex = 200
+	Button.Parent = List
+
+	local Corner = Instance.new("UICorner")
+
+	Corner.CornerRadius =
+		UDim.new(0,13)
+
+	Corner.Parent = Button
+
+	local Stroke = Instance.new("UIStroke")
+
+	Stroke.Color =
+		Color3.fromRGB(65,65,75)
+
+	Stroke.Thickness = 1
+
+	Stroke.Parent = Button
+
+	Button.Activated:Connect(function()
+
+		local enabled =
+			not Button:GetAttribute("Enabled")
+
+		Button:SetAttribute(
+			"Enabled",
+			enabled
+		)
+
+		if enabled then
+
+			Button.Text =
+				icon.."   "..name.."  •  AÇIK"
+
+			Button.BackgroundColor3 =
+				Color3.fromRGB(145,0,25)
+
+			Stroke.Color =
+				Color3.fromRGB(255,30,45)
 
 		else
 
-			B:SetAttribute("Enabled",true)
-			B.Text = text.."  •  AÇIK"
-			B.BackgroundColor3 =
-				Color3.fromRGB(150,0,25)
+			Button.Text =
+				icon.."   "..name.."  •  KAPALI"
 
+			Button.BackgroundColor3 =
+				Color3.fromRGB(30,30,38)
+
+			Stroke.Color =
+				Color3.fromRGB(65,65,75)
+
+		end
+
+		if callback then
+			callback(enabled)
 		end
 
 	end)
 
-	return B
+	return Button
 end
 
-Button("❤️ Ölümsüzlük")
-Button("🚀 Mobil Fly")
-Button("⚡ Süper Hız")
-Button("🦘 Yüksek Zıplama")
-Button("♾️ Sonsuz Zıplama")
-Button("👻 Noclip")
-Button("🛑 Hover")
-Button("☀️ FullBright")
-Button("🏃 Sprint")
-Button("🔄 Respawn")
+--==================================================
+-- FEATURES
+--==================================================
 
-Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+CreateButton(
+	"Ölümsüzlük",
+	"❤️",
+	function(enabled)
+
+		if enabled and Humanoid then
+			Humanoid.MaxHealth = 100
+			Humanoid.Health = 100
+		end
+
+	end
+)
+
+CreateButton(
+	"Mobil Fly",
+	"🚀"
+)
+
+CreateButton(
+	"Süper Hız",
+	"⚡",
+	function(enabled)
+
+		if Humanoid then
+			Humanoid.WalkSpeed =
+				enabled and 100 or 16
+		end
+
+	end
+)
+
+CreateButton(
+	"Yüksek Zıplama",
+	"🦘",
+	function(enabled)
+
+		if Humanoid then
+			Humanoid.UseJumpPower = true
+			Humanoid.JumpPower =
+				enabled and 150 or 50
+		end
+
+	end
+)
+
+CreateButton(
+	"Sonsuz Zıplama",
+	"♾️"
+)
+
+CreateButton(
+	"Noclip",
+	"👻"
+)
+
+CreateButton(
+	"Hover",
+	"🛑"
+)
+
+CreateButton(
+	"FullBright",
+	"☀️",
+	function(enabled)
+
+		if enabled then
+
+			Lighting.Brightness = 3
+			Lighting.ClockTime = 14
+			Lighting.GlobalShadows = false
+			Lighting.FogEnd = 100000
+
+		else
+
+			Lighting.GlobalShadows = true
+
+		end
+
+	end
+)
+
+CreateButton(
+	"Sprint",
+	"🏃",
+	function(enabled)
+
+		if Humanoid then
+			Humanoid.WalkSpeed =
+				enabled and 50 or 16
+		end
+
+	end
+)
+
+CreateButton(
+	"Respawn",
+	"🔄",
+	function()
+
+		if Humanoid then
+			Humanoid.Health = 0
+		end
+
+	end
+)
+
+--==================================================
+-- SCROLL SIZE
+--==================================================
+
+Layout:GetPropertyChangedSignal(
+	"AbsoluteContentSize"
+):Connect(function()
+
 	List.CanvasSize =
 		UDim2.fromOffset(
 			0,
 			Layout.AbsoluteContentSize.Y + 15
 		)
+
 end)
 
-local visible = true
+--==================================================
+-- OPEN / CLOSE
+--==================================================
 
-Open.Activated:Connect(function()
+local Open = true
 
-	visible = not visible
-	Panel.Visible = visible
+OpenButton.Activated:Connect(function()
 
-	if visible then
-		Open.Text = "×"
-	else
-		Open.Text = "☰"
+	Open = not Open
+
+	Main.Visible = Open
+
+	OpenButton.Text =
+		Open and "×" or "☰"
+
+end)
+
+--==================================================
+-- DRAGGABLE OPEN BUTTON
+--==================================================
+
+local Dragging = false
+local DragStart
+local StartPosition
+local Moved = false
+
+OpenButton.InputBegan:Connect(function(input)
+
+	if input.UserInputType ==
+		Enum.UserInputType.Touch
+		or input.UserInputType ==
+		Enum.UserInputType.MouseButton1 then
+
+		Dragging = true
+		Moved = false
+
+		DragStart =
+			input.Position
+
+		StartPosition =
+			OpenButton.Position
+
 	end
 
 end)
 
-Open.Text = "×"
+UIS.InputChanged:Connect(function(input)
+
+	if not Dragging then
+		return
+	end
+
+	if input.UserInputType ==
+		Enum.UserInputType.Touch
+		or input.UserInputType ==
+		Enum.UserInputType.MouseMovement then
+
+		local Delta =
+			input.Position - DragStart
+
+		if Delta.Magnitude > 8 then
+			Moved = true
+		end
+
+		OpenButton.Position =
+			UDim2.new(
+				StartPosition.X.Scale,
+				StartPosition.X.Offset + Delta.X,
+				StartPosition.Y.Scale,
+				StartPosition.Y.Offset + Delta.Y
+			)
+
+	end
+
+end)
+
+UIS.InputEnded:Connect(function(input)
+
+	if input.UserInputType ==
+		Enum.UserInputType.Touch
+		or input.UserInputType ==
+		Enum.UserInputType.MouseButton1 then
+
+		Dragging = false
+
+	end
+
+end)
+
+--==================================================
+-- INFINITE JUMP
+--==================================================
+
+UIS.JumpRequest:Connect(function()
+
+	if Humanoid then
+
+		local Infinite =
+			false
+
+		-- Sonsuz zıplama butonu bulunursa
+		for _,button in ipairs(
+			List:GetChildren()
+		) do
+
+			if button:IsA("TextButton")
+				and button.Name ==
+				"Sonsuz Zıplama" then
+
+				Infinite =
+					button:GetAttribute("Enabled")
+					or false
+
+			end
+
+		end
+
+		if Infinite then
+
+			Humanoid:ChangeState(
+				Enum.HumanoidStateType.Jumping
+			)
+
+		end
+
+	end
+
+end)
+
+--==================================================
+-- LOOP
+--==================================================
+
+RunService.Heartbeat:Connect(function()
+
+	if not Character
+		or not Humanoid
+		or not Root then
+		return
+	end
+
+	-- God
+	for _,button in ipairs(
+		List:GetChildren()
+	) do
+
+		if button:IsA("TextButton")
+			and button.Name ==
+			"Ölümsüzlük" then
+
+			if button:GetAttribute("Enabled") then
+
+				Humanoid.MaxHealth = 100
+
+				if Humanoid.Health < 100 then
+					Humanoid.Health = 100
+				end
+
+			end
+
+		end
+
+	end
+
+	-- Noclip
+	for _,button in ipairs(
+		List:GetChildren()
+	) do
+
+		if button:IsA("TextButton")
+			and button.Name ==
+			"Noclip" then
+
+			if button:GetAttribute("Enabled") then
+
+				for _,part in ipairs(
+					Character:GetDescendants()
+				) do
+
+					if part:IsA("BasePart") then
+						part.CanCollide = false
+					end
+
+				end
+
+			end
+
+		end
+
+	end
+
+end)
