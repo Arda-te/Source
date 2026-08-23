@@ -1,683 +1,352 @@
---========================================================
---                    ARDA HUB V2
---             PRIVATE / STUDIO TEST PANEL
---========================================================
+--// ARDA HUB V3 - PRIVATE / STUDIO TEST
+--// TEK LOCALSCRIPT
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
 
 local Player = Players.LocalPlayer
-
---========================================================
--- SETTINGS
---========================================================
+local Character, Humanoid, Root
 
 local State = {
 	God = false,
 	Speed = false,
-	SuperJump = false,
+	Jump = false,
 	Fly = false,
 	Noclip = false,
 	Invisible = false,
-	ForceField = false,
 	FullBright = false
 }
 
-local NORMAL_SPEED = 16
-local FAST_SPEED = 100
-
-local NORMAL_JUMP = 50
-local SUPER_JUMP_POWER = 150
-
-local FLY_SPEED = 90
-
-local Humanoid
-local Root
-local Character
-
---========================================================
--- CHARACTER
---========================================================
-
-local function LoadCharacter(char)
+local function characterLoaded(char)
 	Character = char
-
 	Humanoid = char:WaitForChild("Humanoid")
 	Root = char:WaitForChild("HumanoidRootPart")
-
-	Humanoid.WalkSpeed = NORMAL_SPEED
-	Humanoid.UseJumpPower = true
-	Humanoid.JumpPower = NORMAL_JUMP
 end
 
 if Player.Character then
-	LoadCharacter(Player.Character)
+	characterLoaded(Player.Character)
 end
 
 Player.CharacterAdded:Connect(function(char)
-	task.wait(0.3)
-	LoadCharacter(char)
+	task.wait(.2)
+	characterLoaded(char)
 end)
 
---========================================================
 -- GUI
---========================================================
-
 local Gui = Instance.new("ScreenGui")
 Gui.Name = "ArdaHub"
 Gui.ResetOnSpawn = false
 Gui.IgnoreGuiInset = true
 Gui.Parent = Player:WaitForChild("PlayerGui")
 
--- Main
 local Main = Instance.new("Frame")
-Main.Name = "Main"
-Main.Size = UDim2.fromOffset(360, 500)
-Main.Position = UDim2.new(0, 30, 0.5, -250)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 13)
+Main.Size = UDim2.new(0,340,0,460)
+Main.Position = UDim2.new(.5,-170,.5,-230)
+Main.BackgroundColor3 = Color3.fromRGB(10,10,14)
 Main.BorderSizePixel = 0
 Main.Parent = Gui
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 18)
-MainCorner.Parent = Main
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0,20)
+corner.Parent = Main
 
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(255, 25, 45)
-MainStroke.Thickness = 2
-MainStroke.Transparency = 0.1
-MainStroke.Parent = Main
-
---========================================================
--- HEADER
---========================================================
+local outline = Instance.new("UIStroke")
+outline.Color = Color3.fromRGB(255,25,45)
+outline.Thickness = 2
+outline.Parent = Main
 
 local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1, 0, 0, 78)
-Header.BackgroundColor3 = Color3.fromRGB(125, 0, 15)
+Header.Size = UDim2.new(1,0,0,75)
+Header.BackgroundColor3 = Color3.fromRGB(130,0,20)
 Header.BorderSizePixel = 0
 Header.Parent = Main
 
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 18)
-HeaderCorner.Parent = Header
-
-local HeaderFix = Instance.new("Frame")
-HeaderFix.Size = UDim2.new(1, 0, 0, 22)
-HeaderFix.Position = UDim2.new(0, 0, 1, -22)
-HeaderFix.BackgroundColor3 = Color3.fromRGB(125, 0, 15)
-HeaderFix.BorderSizePixel = 0
-HeaderFix.Parent = Header
+local hc = Instance.new("UICorner")
+hc.CornerRadius = UDim.new(0,20)
+hc.Parent = Header
 
 local Title = Instance.new("TextLabel")
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.fromOffset(20, 7)
-Title.Size = UDim2.new(1, -40, 0, 38)
+Title.Position = UDim2.fromOffset(18,8)
+Title.Size = UDim2.new(1,-36,0,38)
 Title.Text = "ARDA HUB"
-Title.TextColor3 = Color3.new(1, 1, 1)
+Title.TextColor3 = Color3.new(1,1,1)
 Title.Font = Enum.Font.GothamBlack
 Title.TextSize = 27
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
-local Subtitle = Instance.new("TextLabel")
-Subtitle.BackgroundTransparency = 1
-Subtitle.Position = UDim2.fromOffset(21, 43)
-Subtitle.Size = UDim2.new(1, -42, 0, 20)
-Subtitle.Text = "PRIVATE TEST • V2"
-Subtitle.TextColor3 = Color3.fromRGB(255, 190, 195)
-Subtitle.Font = Enum.Font.GothamBold
-Subtitle.TextSize = 11
-Subtitle.TextXAlignment = Enum.TextXAlignment.Left
-Subtitle.Parent = Header
-
---========================================================
--- SCROLL
---========================================================
+local Sub = Instance.new("TextLabel")
+Sub.BackgroundTransparency = 1
+Sub.Position = UDim2.fromOffset(19,45)
+Sub.Size = UDim2.new(1,-38,0,20)
+Sub.Text = "PRIVATE TEST • MOBILE"
+Sub.TextColor3 = Color3.fromRGB(255,190,195)
+Sub.Font = Enum.Font.GothamBold
+Sub.TextSize = 11
+Sub.TextXAlignment = Enum.TextXAlignment.Left
+Sub.Parent = Header
 
 local Scroll = Instance.new("ScrollingFrame")
-Scroll.Position = UDim2.fromOffset(12, 90)
-Scroll.Size = UDim2.new(1, -24, 1, -102)
+Scroll.Position = UDim2.fromOffset(12,85)
+Scroll.Size = UDim2.new(1,-24,1,-97)
 Scroll.BackgroundTransparency = 1
 Scroll.BorderSizePixel = 0
 Scroll.ScrollBarThickness = 4
-Scroll.ScrollBarImageColor3 = Color3.fromRGB(220, 20, 40)
-Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+Scroll.ScrollBarImageColor3 = Color3.fromRGB(255,30,45)
 Scroll.Parent = Main
 
 local Layout = Instance.new("UIListLayout")
-Layout.Padding = UDim.new(0, 8)
-Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+Layout.Padding = UDim.new(0,8)
 Layout.Parent = Scroll
 
-local Padding = Instance.new("UIPadding")
-Padding.PaddingTop = UDim.new(0, 4)
-Padding.PaddingBottom = UDim.new(0, 10)
-Padding.Parent = Scroll
+local function button(text, icon, callback)
+	local b = Instance.new("TextButton")
+	b.Size = UDim2.new(1,-6,0,55)
+	b.BackgroundColor3 = Color3.fromRGB(27,27,33)
+	b.BorderSizePixel = 0
+	b.Text = icon.."   "..text
+	b.TextColor3 = Color3.fromRGB(240,240,245)
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 15
+	b.AutoButtonColor = false
+	b.Parent = Scroll
 
---========================================================
--- BUTTON
---========================================================
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0,13)
+	c.Parent = b
 
-local function CreateButton(text, icon, callback)
+	local s = Instance.new("UIStroke")
+	s.Color = Color3.fromRGB(65,65,75)
+	s.Parent = b
 
-	local Button = Instance.new("TextButton")
-	Button.Size = UDim2.new(1, -8, 0, 52)
-	Button.BackgroundColor3 = Color3.fromRGB(27, 27, 32)
-	Button.BorderSizePixel = 0
-	Button.Text = ""
-	Button.AutoButtonColor = false
-	Button.Parent = Scroll
-
-	local Corner = Instance.new("UICorner")
-	Corner.CornerRadius = UDim.new(0, 12)
-	Corner.Parent = Button
-
-	local Stroke = Instance.new("UIStroke")
-	Stroke.Color = Color3.fromRGB(60, 60, 68)
-	Stroke.Thickness = 1
-	Stroke.Parent = Button
-
-	local Icon = Instance.new("TextLabel")
-	Icon.BackgroundTransparency = 1
-	Icon.Size = UDim2.fromOffset(50, 52)
-	Icon.Text = icon
-	Icon.TextSize = 21
-	Icon.Parent = Button
-
-	local Label = Instance.new("TextLabel")
-	Label.BackgroundTransparency = 1
-	Label.Position = UDim2.fromOffset(55, 0)
-	Label.Size = UDim2.new(1, -65, 1, 0)
-	Label.Text = text
-	Label.TextColor3 = Color3.fromRGB(240, 240, 245)
-	Label.Font = Enum.Font.GothamBold
-	Label.TextSize = 14
-	Label.TextXAlignment = Enum.TextXAlignment.Left
-	Label.Parent = Button
-
-	Button.MouseEnter:Connect(function()
-		TweenService:Create(
-			Button,
-			TweenInfo.new(.12),
-			{BackgroundColor3 = Color3.fromRGB(65, 8, 16)}
-		):Play()
+	b.Activated:Connect(function()
+		callback(b,s)
 	end)
 
-	Button.MouseLeave:Connect(function()
-		TweenService:Create(
-			Button,
-			TweenInfo.new(.12),
-			{BackgroundColor3 = Color3.fromRGB(27, 27, 32)}
-		):Play()
-	end)
-
-	Button.MouseButton1Click:Connect(function()
-		callback(Button, Label, Stroke)
-	end)
-
-	return Button
+	return b
 end
 
-local function Toggle(Button, Label, Stroke, On)
-
-	if On then
-		Label.Text = Label.Text:gsub("OFF", "ON")
-		Button.BackgroundColor3 = Color3.fromRGB(115, 0, 15)
-		Stroke.Color = Color3.fromRGB(255, 30, 45)
+local function toggle(b,s,on,name)
+	if on then
+		b.Text = name.."   • AÇIK"
+		b.BackgroundColor3 = Color3.fromRGB(125,0,20)
+		s.Color = Color3.fromRGB(255,30,45)
 	else
-		Label.Text = Label.Text:gsub("ON", "OFF")
-		Button.BackgroundColor3 = Color3.fromRGB(27, 27, 32)
-		Stroke.Color = Color3.fromRGB(60, 60, 68)
+		b.Text = name.."   • KAPALI"
+		b.BackgroundColor3 = Color3.fromRGB(27,27,33)
+		s.Color = Color3.fromRGB(65,65,75)
 	end
-
 end
 
---========================================================
--- GOD MODE
---========================================================
-
-CreateButton("Ölümsüzlük • OFF", "☠", function(b,l,s)
-
+-- ÖLÜMSÜZLÜK
+button("Ölümsüzlük   • KAPALI","☠",function(b,s)
 	State.God = not State.God
-
-	Toggle(b,l,s,State.God)
-
+	toggle(b,s,State.God,"☠ Ölümsüzlük")
 end)
 
---========================================================
+-- HIZ
+button("Süper Hız   • KAPALI","⚡",function(b,s)
+	State.Speed = not State.Speed
+	toggle(b,s,State.Speed,"⚡ Süper Hız")
+end)
+
+-- ZIPLAMA
+button("Süper Zıplama   • KAPALI","🦘",function(b,s)
+	State.Jump = not State.Jump
+	toggle(b,s,State.Jump,"🦘 Süper Zıplama")
+end)
+
+-- UÇUŞ
+button("Uçuş   • KAPALI","🚀",function(b,s)
+	State.Fly = not State.Fly
+	toggle(b,s,State.Fly,"🚀 Uçuş")
+end)
+
+-- NOCLIP
+button("Noclip   • KAPALI","👻",function(b,s)
+	State.Noclip = not State.Noclip
+	toggle(b,s,State.Noclip,"👻 Noclip")
+end)
+
+-- GÖRÜNMEZ
+button("Görünmezlik   • KAPALI","🫥",function(b,s)
+	State.Invisible = not State.Invisible
+	toggle(b,s,State.Invisible,"🫥 Görünmezlik")
+end)
+
+-- FULLBRIGHT
+button("FullBright   • KAPALI","🌙",function(b,s)
+	State.FullBright = not State.FullBright
+	toggle(b,s,State.FullBright,"🌙 FullBright")
+end)
+
 -- FULL HEAL
---========================================================
-
-CreateButton("Canı Doldur", "❤️", function()
-
+button("Canı Doldur","❤️",function()
 	if Humanoid then
 		Humanoid.Health = Humanoid.MaxHealth
 	end
-
 end)
 
---========================================================
--- SPEED
---========================================================
-
-CreateButton("Süper Hız • OFF", "⚡", function(b,l,s)
-
-	State.Speed = not State.Speed
-
-	Toggle(b,l,s,State.Speed)
-
-	if Humanoid then
-		Humanoid.WalkSpeed =
-			State.Speed and FAST_SPEED or NORMAL_SPEED
-	end
-
-end)
-
---========================================================
--- SUPER JUMP
---========================================================
-
-CreateButton("Süper Zıplama • OFF", "🦘", function(b,l,s)
-
-	State.SuperJump = not State.SuperJump
-
-	Toggle(b,l,s,State.SuperJump)
-
-	if Humanoid then
-		Humanoid.UseJumpPower = true
-		Humanoid.JumpPower =
-			State.SuperJump and SUPER_JUMP_POWER or NORMAL_JUMP
-	end
-
-end)
-
---========================================================
--- FLY
---========================================================
-
-CreateButton("Uçuş • OFF", "🚀", function(b,l,s)
-
-	State.Fly = not State.Fly
-
-	Toggle(b,l,s,State.Fly)
-
-	if not State.Fly and Root then
-		Root.AssemblyLinearVelocity = Vector3.zero
-	end
-
-end)
-
---========================================================
--- NOCLIP
---========================================================
-
-CreateButton("Noclip • OFF", "👻", function(b,l,s)
-
-	State.Noclip = not State.Noclip
-
-	Toggle(b,l,s,State.Noclip)
-
-end)
-
---========================================================
--- INVISIBLE
---========================================================
-
-CreateButton("Görünmezlik • OFF", "🫥", function(b,l,s)
-
-	State.Invisible = not State.Invisible
-
-	Toggle(b,l,s,State.Invisible)
-
-	if Character then
-
-		for _, obj in ipairs(Character:GetDescendants()) do
-
-			if obj:IsA("BasePart") then
-				obj.LocalTransparencyModifier =
-					State.Invisible and 1 or 0
-			end
-
-			if obj:IsA("Decal") then
-				obj.Transparency =
-					State.Invisible and 1 or 0
-			end
-
-		end
-
-	end
-
-end)
-
---========================================================
--- FORCEFIELD
---========================================================
-
-CreateButton("ForceField • OFF", "🛡️", function(b,l,s)
-
-	State.ForceField = not State.ForceField
-
-	Toggle(b,l,s,State.ForceField)
-
-	if Character then
-
-		local existing =
-			Character:FindFirstChild("ArdaForceField")
-
-		if State.ForceField then
-
-			if not existing then
-
-				local ff = Instance.new("ForceField")
-				ff.Name = "ArdaForceField"
-				ff.Visible = true
-				ff.Parent = Character
-
-			end
-
-		else
-
-			if existing then
-				existing:Destroy()
-			end
-
-		end
-
-	end
-
-end)
-
---========================================================
--- FULLBRIGHT
---========================================================
-
-CreateButton("FullBright • OFF", "🌙", function(b,l,s)
-
-	State.FullBright = not State.FullBright
-
-	Toggle(b,l,s,State.FullBright)
-
-	if State.FullBright then
-
-		Lighting.Brightness = 3
-		Lighting.ClockTime = 14
-		Lighting.FogEnd = 100000
-		Lighting.GlobalShadows = false
-
-	else
-
-		Lighting.Brightness = 2
-		Lighting.GlobalShadows = true
-
-	end
-
-end)
-
---========================================================
--- GRAVITY
---========================================================
-
-CreateButton("Düşük Gravity", "🌀", function()
-
-	workspace.Gravity = 40
-
-end)
-
-CreateButton("Normal Gravity", "🌎", function()
-
-	workspace.Gravity = 196.2
-
-end)
-
---========================================================
 -- RESET
---========================================================
-
-CreateButton("Karakteri Yenile", "🔄", function()
-
+button("Karakteri Yenile","🔄",function()
 	if Humanoid then
 		Humanoid.Health = 0
 	end
-
 end)
 
---========================================================
--- SPAWN'A GİT
---========================================================
-
-CreateButton("Spawn'a Git", "📍", function()
-
-	if Root then
-
-		local spawnLocation =
-			workspace:FindFirstChildWhichIsA("SpawnLocation", true)
-
-		if spawnLocation then
-
-			Root.CFrame =
-				spawnLocation.CFrame + Vector3.new(0,5,0)
-
-		end
-
-	end
-
+-- NORMAL GRAVITY
+button("Normal Gravity","🌎",function()
+	workspace.Gravity = 196.2
 end)
 
---========================================================
+-- LOW GRAVITY
+button("Düşük Gravity","🌀",function()
+	workspace.Gravity = 40
+end)
+
 -- FOV
---========================================================
-
-CreateButton("FOV 100", "🎯", function()
-
-	local camera = workspace.CurrentCamera
-
-	if camera then
-		camera.FieldOfView = 100
-	end
-
+button("FOV 100","🎯",function()
+	workspace.CurrentCamera.FieldOfView = 100
 end)
 
-CreateButton("FOV Normal", "🔭", function()
-
-	local camera = workspace.CurrentCamera
-
-	if camera then
-		camera.FieldOfView = 70
-	end
-
+button("FOV Normal","🔭",function()
+	workspace.CurrentCamera.FieldOfView = 70
 end)
 
---========================================================
--- HEARTBEAT
---========================================================
+-- Scroll size
+Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+	Scroll.CanvasSize = UDim2.fromOffset(
+		0,
+		Layout.AbsoluteContentSize.Y + 15
+	)
+end)
 
+-- MOBİL / PC AÇ KAPAT
+local OpenButton = Instance.new("TextButton")
+OpenButton.Size = UDim2.fromOffset(60,60)
+OpenButton.Position = UDim2.new(1,-75,1,-80)
+OpenButton.BackgroundColor3 = Color3.fromRGB(130,0,20)
+OpenButton.Text = "☰"
+OpenButton.TextColor3 = Color3.new(1,1,1)
+OpenButton.TextSize = 26
+OpenButton.Font = Enum.Font.GothamBold
+OpenButton.Parent = Gui
+
+local oc = Instance.new("UICorner")
+oc.CornerRadius = UDim.new(1,0)
+oc.Parent = OpenButton
+
+OpenButton.Activated:Connect(function()
+	Main.Visible = not Main.Visible
+end)
+
+-- RIGHT SHIFT
+UIS.InputBegan:Connect(function(input,gp)
+	if gp then return end
+
+	if input.KeyCode == Enum.KeyCode.RightShift then
+		Main.Visible = not Main.Visible
+	end
+end)
+
+-- ANA DÖNGÜ
 RunService.Heartbeat:Connect(function()
 
 	if not Humanoid or not Humanoid.Parent then
 		return
 	end
 
-	-- GOD
+	-- Ölümsüzlük / sürekli full can
 	if State.God then
 		Humanoid.Health = Humanoid.MaxHealth
 	end
 
-	-- SPEED
+	-- Hız
 	if State.Speed then
-		Humanoid.WalkSpeed = FAST_SPEED
+		Humanoid.WalkSpeed = 100
+	else
+		Humanoid.WalkSpeed = 16
 	end
 
-	-- JUMP
-	if State.SuperJump then
-		Humanoid.UseJumpPower = true
-		Humanoid.JumpPower = SUPER_JUMP_POWER
+	-- Zıplama
+	Humanoid.UseJumpPower = true
+
+	if State.Jump then
+		Humanoid.JumpPower = 150
+	else
+		Humanoid.JumpPower = 50
 	end
 
-	-- NOCLIP
+	-- Noclip
 	if State.Noclip and Character then
-
-		for _, obj in ipairs(Character:GetDescendants()) do
-
-			if obj:IsA("BasePart") then
-				obj.CanCollide = false
+		for _,v in ipairs(Character:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.CanCollide = false
 			end
-
 		end
-
 	end
 
-	-- FLY
+	-- Görünmezlik
+	if Character then
+		for _,v in ipairs(Character:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.LocalTransparencyModifier =
+					State.Invisible and 1 or 0
+			elseif v:IsA("Decal") then
+				v.Transparency =
+					State.Invisible and 1 or 0
+			end
+		end
+	end
+
+	-- FullBright
+	if State.FullBright then
+		Lighting.Brightness = 3
+		Lighting.ClockTime = 14
+		Lighting.FogEnd = 100000
+		Lighting.GlobalShadows = false
+	end
+
+	-- Uçuş
 	if State.Fly and Root then
 
-		local Camera = workspace.CurrentCamera
+		local cam = workspace.CurrentCamera
+		local dir = Vector3.zero
 
-		local Direction = Vector3.zero
-
-		if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-			Direction += Camera.CFrame.LookVector
+		if UIS:IsKeyDown(Enum.KeyCode.W) then
+			dir += cam.CFrame.LookVector
 		end
 
-		if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-			Direction -= Camera.CFrame.LookVector
+		if UIS:IsKeyDown(Enum.KeyCode.S) then
+			dir -= cam.CFrame.LookVector
 		end
 
-		if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-			Direction -= Camera.CFrame.RightVector
+		if UIS:IsKeyDown(Enum.KeyCode.A) then
+			dir -= cam.CFrame.RightVector
 		end
 
-		if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-			Direction += Camera.CFrame.RightVector
+		if UIS:IsKeyDown(Enum.KeyCode.D) then
+			dir += cam.CFrame.RightVector
 		end
 
-		if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-			Direction += Vector3.new(0,1,0)
+		if UIS:IsKeyDown(Enum.KeyCode.Space) then
+			dir += Vector3.new(0,1,0)
 		end
 
-		if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-			Direction -= Vector3.new(0,1,0)
+		if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
+			dir -= Vector3.new(0,1,0)
 		end
 
-		if Direction.Magnitude > 0 then
-
+		if dir.Magnitude > 0 then
 			Root.AssemblyLinearVelocity =
-				Direction.Unit * FLY_SPEED
-
+				dir.Unit * 85
 		else
-
 			Root.AssemblyLinearVelocity =
 				Vector3.zero
-
 		end
-
 	end
-
-end)
-
---========================================================
--- DRAGGABLE WINDOW
---========================================================
-
-local Dragging = false
-local DragStart
-local StartPosition
-
-Header.InputBegan:Connect(function(input)
-
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-
-		Dragging = true
-		DragStart = input.Position
-		StartPosition = Main.Position
-
-	end
-
-end)
-
-Header.InputEnded:Connect(function(input)
-
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		Dragging = false
-	end
-
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-
-	if not Dragging then
-		return
-	end
-
-	if input.UserInputType == Enum.UserInputType.MouseMovement then
-
-		local Delta =
-			input.Position - DragStart
-
-		Main.Position =
-			UDim2.new(
-				StartPosition.X.Scale,
-				StartPosition.X.Offset + Delta.X,
-				StartPosition.Y.Scale,
-				StartPosition.Y.Offset + Delta.Y
-			)
-
-	end
-
-end)
-
---========================================================
--- RIGHT SHIFT
---========================================================
-
-local Open = true
-
-UserInputService.InputBegan:Connect(function(input, processed)
-
-	if processed then
-		return
-	end
-
-	if input.KeyCode == Enum.KeyCode.RightShift then
-
-		Open = not Open
-
-		local target
-
-		if Open then
-			target =
-				UDim2.new(0,30,0.5,-250)
-		else
-			target =
-				UDim2.new(0,-380,0.5,-250)
-		end
-
-		TweenService:Create(
-			Main,
-			TweenInfo.new(
-				0.3,
-				Enum.EasingStyle.Quint,
-				Enum.EasingDirection.Out
-			),
-			{Position = target}
-		):Play()
-
-	end
-
-end)
-
---========================================================
--- SCROLL SIZE
---========================================================
-
-Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-
-	Scroll.CanvasSize =
-		UDim2.fromOffset(
-			0,
-			Layout.AbsoluteContentSize.Y + 25
-		)
-
 end)
