@@ -1,81 +1,109 @@
---// ARDA HUB V3 - PRIVATE / STUDIO TEST
---// TEK LOCALSCRIPT
+--====================================================
+--                 ARDA HUB MOBILE V5
+--              PRIVATE / STUDIO TEST
+--====================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 
 local Player = Players.LocalPlayer
-local Character, Humanoid, Root
+
+local Character
+local Humanoid
+local Root
 
 local State = {
+	Fly = false,
 	God = false,
 	Speed = false,
 	Jump = false,
-	Fly = false,
 	Noclip = false,
 	Invisible = false,
-	FullBright = false
+	FullBright = false,
+	Hover = false
 }
 
-local function characterLoaded(char)
+local FlySpeed = 80
+
+--====================================================
+-- CHARACTER
+--====================================================
+
+local function LoadCharacter(char)
+
 	Character = char
 	Humanoid = char:WaitForChild("Humanoid")
 	Root = char:WaitForChild("HumanoidRootPart")
+
 end
 
 if Player.Character then
-	characterLoaded(Player.Character)
+	LoadCharacter(Player.Character)
 end
 
 Player.CharacterAdded:Connect(function(char)
+
 	task.wait(.2)
-	characterLoaded(char)
+
+	LoadCharacter(char)
+
+	if State.God then
+		Humanoid.MaxHealth = 100
+		Humanoid.Health = 100
+	end
+
 end)
 
+--====================================================
 -- GUI
+--====================================================
+
 local Gui = Instance.new("ScreenGui")
-Gui.Name = "ArdaHub"
+Gui.Name = "ArdaHubV5"
 Gui.ResetOnSpawn = false
 Gui.IgnoreGuiInset = true
 Gui.Parent = Player:WaitForChild("PlayerGui")
 
 local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0,340,0,460)
-Main.Position = UDim2.new(.5,-170,.5,-230)
+Main.Size = UDim2.fromOffset(350,500)
+Main.Position = UDim2.new(.5,-175,.5,-250)
 Main.BackgroundColor3 = Color3.fromRGB(10,10,14)
 Main.BorderSizePixel = 0
 Main.Parent = Gui
 
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0,20)
-corner.Parent = Main
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0,20)
+MainCorner.Parent = Main
 
-local outline = Instance.new("UIStroke")
-outline.Color = Color3.fromRGB(255,25,45)
-outline.Thickness = 2
-outline.Parent = Main
+local Outline = Instance.new("UIStroke")
+Outline.Color = Color3.fromRGB(255,25,45)
+Outline.Thickness = 2
+Outline.Parent = Main
+
+--====================================================
+-- HEADER
+--====================================================
 
 local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1,0,0,75)
+Header.Size = UDim2.new(1,0,0,78)
 Header.BackgroundColor3 = Color3.fromRGB(130,0,20)
 Header.BorderSizePixel = 0
 Header.Parent = Main
 
-local hc = Instance.new("UICorner")
-hc.CornerRadius = UDim.new(0,20)
-hc.Parent = Header
+local HC = Instance.new("UICorner")
+HC.CornerRadius = UDim.new(0,20)
+HC.Parent = Header
 
 local Title = Instance.new("TextLabel")
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.fromOffset(18,8)
-Title.Size = UDim2.new(1,-36,0,38)
+Title.Position = UDim2.fromOffset(18,7)
+Title.Size = UDim2.new(1,-36,0,40)
 Title.Text = "ARDA HUB"
 Title.TextColor3 = Color3.new(1,1,1)
 Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 27
+Title.TextSize = 28
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = Header
 
@@ -83,16 +111,20 @@ local Sub = Instance.new("TextLabel")
 Sub.BackgroundTransparency = 1
 Sub.Position = UDim2.fromOffset(19,45)
 Sub.Size = UDim2.new(1,-38,0,20)
-Sub.Text = "PRIVATE TEST • MOBILE"
+Sub.Text = "MOBILE FLY • V5"
 Sub.TextColor3 = Color3.fromRGB(255,190,195)
 Sub.Font = Enum.Font.GothamBold
 Sub.TextSize = 11
 Sub.TextXAlignment = Enum.TextXAlignment.Left
 Sub.Parent = Header
 
+--====================================================
+-- SCROLL
+--====================================================
+
 local Scroll = Instance.new("ScrollingFrame")
-Scroll.Position = UDim2.fromOffset(12,85)
-Scroll.Size = UDim2.new(1,-24,1,-97)
+Scroll.Position = UDim2.fromOffset(12,88)
+Scroll.Size = UDim2.new(1,-24,1,-100)
 Scroll.BackgroundTransparency = 1
 Scroll.BorderSizePixel = 0
 Scroll.ScrollBarThickness = 4
@@ -103,176 +135,486 @@ local Layout = Instance.new("UIListLayout")
 Layout.Padding = UDim.new(0,8)
 Layout.Parent = Scroll
 
-local function button(text, icon, callback)
-	local b = Instance.new("TextButton")
-	b.Size = UDim2.new(1,-6,0,55)
-	b.BackgroundColor3 = Color3.fromRGB(27,27,33)
-	b.BorderSizePixel = 0
-	b.Text = icon.."   "..text
-	b.TextColor3 = Color3.fromRGB(240,240,245)
-	b.Font = Enum.Font.GothamBold
-	b.TextSize = 15
-	b.AutoButtonColor = false
-	b.Parent = Scroll
+--====================================================
+-- BUTTON
+--====================================================
 
-	local c = Instance.new("UICorner")
-	c.CornerRadius = UDim.new(0,13)
-	c.Parent = b
+local function CreateButton(text,icon,callback)
 
-	local s = Instance.new("UIStroke")
-	s.Color = Color3.fromRGB(65,65,75)
-	s.Parent = b
+	local Button = Instance.new("TextButton")
 
-	b.Activated:Connect(function()
-		callback(b,s)
+	Button.Size = UDim2.new(1,-6,0,55)
+
+	Button.BackgroundColor3 =
+		Color3.fromRGB(27,27,33)
+
+	Button.BorderSizePixel = 0
+
+	Button.Text = icon.."   "..text
+
+	Button.TextColor3 =
+		Color3.fromRGB(240,240,245)
+
+	Button.Font = Enum.Font.GothamBold
+
+	Button.TextSize = 15
+
+	Button.AutoButtonColor = false
+
+	Button.Parent = Scroll
+
+	local Corner = Instance.new("UICorner")
+
+	Corner.CornerRadius =
+		UDim.new(0,13)
+
+	Corner.Parent = Button
+
+	local Stroke = Instance.new("UIStroke")
+
+	Stroke.Color =
+		Color3.fromRGB(65,65,75)
+
+	Stroke.Parent = Button
+
+	Button.Activated:Connect(function()
+
+		callback(Button,Stroke)
+
 	end)
 
-	return b
+	return Button
+
 end
 
-local function toggle(b,s,on,name)
-	if on then
-		b.Text = name.."   • AÇIK"
-		b.BackgroundColor3 = Color3.fromRGB(125,0,20)
-		s.Color = Color3.fromRGB(255,30,45)
+local function Toggle(Button,Stroke,StateValue,Name)
+
+	if StateValue then
+
+		Button.Text =
+			Name.."   • AÇIK"
+
+		Button.BackgroundColor3 =
+			Color3.fromRGB(125,0,20)
+
+		Stroke.Color =
+			Color3.fromRGB(255,30,45)
+
 	else
-		b.Text = name.."   • KAPALI"
-		b.BackgroundColor3 = Color3.fromRGB(27,27,33)
-		s.Color = Color3.fromRGB(65,65,75)
+
+		Button.Text =
+			Name.."   • KAPALI"
+
+		Button.BackgroundColor3 =
+			Color3.fromRGB(27,27,33)
+
+		Stroke.Color =
+			Color3.fromRGB(65,65,75)
+
 	end
+
 end
 
--- ÖLÜMSÜZLÜK
-button("Ölümsüzlük   • KAPALI","☠",function(b,s)
+--====================================================
+-- GOD
+--====================================================
+
+CreateButton("Ölümsüzlük • KAPALI","☠",function(b,s)
+
 	State.God = not State.God
-	toggle(b,s,State.God,"☠ Ölümsüzlük")
-end)
 
--- HIZ
-button("Süper Hız   • KAPALI","⚡",function(b,s)
-	State.Speed = not State.Speed
-	toggle(b,s,State.Speed,"⚡ Süper Hız")
-end)
-
--- ZIPLAMA
-button("Süper Zıplama   • KAPALI","🦘",function(b,s)
-	State.Jump = not State.Jump
-	toggle(b,s,State.Jump,"🦘 Süper Zıplama")
-end)
-
--- UÇUŞ
-button("Uçuş   • KAPALI","🚀",function(b,s)
-	State.Fly = not State.Fly
-	toggle(b,s,State.Fly,"🚀 Uçuş")
-end)
-
--- NOCLIP
-button("Noclip   • KAPALI","👻",function(b,s)
-	State.Noclip = not State.Noclip
-	toggle(b,s,State.Noclip,"👻 Noclip")
-end)
-
--- GÖRÜNMEZ
-button("Görünmezlik   • KAPALI","🫥",function(b,s)
-	State.Invisible = not State.Invisible
-	toggle(b,s,State.Invisible,"🫥 Görünmezlik")
-end)
-
--- FULLBRIGHT
-button("FullBright   • KAPALI","🌙",function(b,s)
-	State.FullBright = not State.FullBright
-	toggle(b,s,State.FullBright,"🌙 FullBright")
-end)
-
--- FULL HEAL
-button("Canı Doldur","❤️",function()
-	if Humanoid then
-		Humanoid.Health = Humanoid.MaxHealth
-	end
-end)
-
--- RESET
-button("Karakteri Yenile","🔄",function()
-	if Humanoid then
-		Humanoid.Health = 0
-	end
-end)
-
--- NORMAL GRAVITY
-button("Normal Gravity","🌎",function()
-	workspace.Gravity = 196.2
-end)
-
--- LOW GRAVITY
-button("Düşük Gravity","🌀",function()
-	workspace.Gravity = 40
-end)
-
--- FOV
-button("FOV 100","🎯",function()
-	workspace.CurrentCamera.FieldOfView = 100
-end)
-
-button("FOV Normal","🔭",function()
-	workspace.CurrentCamera.FieldOfView = 70
-end)
-
--- Scroll size
-Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-	Scroll.CanvasSize = UDim2.fromOffset(
-		0,
-		Layout.AbsoluteContentSize.Y + 15
+	Toggle(
+		b,
+		s,
+		State.God,
+		"☠ Ölümsüzlük"
 	)
-end)
 
--- MOBİL / PC AÇ KAPAT
-local OpenButton = Instance.new("TextButton")
-OpenButton.Size = UDim2.fromOffset(60,60)
-OpenButton.Position = UDim2.new(1,-75,1,-80)
-OpenButton.BackgroundColor3 = Color3.fromRGB(130,0,20)
-OpenButton.Text = "☰"
-OpenButton.TextColor3 = Color3.new(1,1,1)
-OpenButton.TextSize = 26
-OpenButton.Font = Enum.Font.GothamBold
-OpenButton.Parent = Gui
+	if State.God and Humanoid then
 
-local oc = Instance.new("UICorner")
-oc.CornerRadius = UDim.new(1,0)
-oc.Parent = OpenButton
+		Humanoid.MaxHealth = 100
+		Humanoid.Health = 100
 
-OpenButton.Activated:Connect(function()
-	Main.Visible = not Main.Visible
-end)
-
--- RIGHT SHIFT
-UIS.InputBegan:Connect(function(input,gp)
-	if gp then return end
-
-	if input.KeyCode == Enum.KeyCode.RightShift then
-		Main.Visible = not Main.Visible
 	end
+
 end)
 
--- ANA DÖNGÜ
+--====================================================
+-- SPEED
+--====================================================
+
+CreateButton("Süper Hız • KAPALI","⚡",function(b,s)
+
+	State.Speed = not State.Speed
+
+	Toggle(
+		b,
+		s,
+		State.Speed,
+		"⚡ Süper Hız"
+	)
+
+end)
+
+--====================================================
+-- JUMP
+--====================================================
+
+CreateButton("Süper Zıplama • KAPALI","🦘",function(b,s)
+
+	State.Jump = not State.Jump
+
+	Toggle(
+		b,
+		s,
+		State.Jump,
+		"🦘 Süper Zıplama"
+	)
+
+end)
+
+--====================================================
+-- FLY
+--====================================================
+
+CreateButton("Mobil Uçuş • KAPALI","🚀",function(b,s)
+
+	State.Fly = not State.Fly
+
+	Toggle(
+		b,
+		s,
+		State.Fly,
+		"🚀 Mobil Uçuş"
+	)
+
+	if Root and not State.Fly then
+
+		Root.AssemblyLinearVelocity =
+			Vector3.zero
+
+	end
+
+end)
+
+--====================================================
+-- HOVER
+--====================================================
+
+CreateButton("Hover • KAPALI","🛑",function(b,s)
+
+	State.Hover = not State.Hover
+
+	Toggle(
+		b,
+		s,
+		State.Hover,
+		"🛑 Hover"
+
+	)
+
+end)
+
+--====================================================
+-- NOCLIP
+--====================================================
+
+CreateButton("Noclip • KAPALI","👻",function(b,s)
+
+	State.Noclip = not State.Noclip
+
+	Toggle(
+		b,
+		s,
+		State.Noclip,
+		"👻 Noclip"
+	)
+
+end)
+
+--====================================================
+-- FLY SPEED
+--====================================================
+
+local SpeedLabel = Instance.new("TextLabel")
+
+SpeedLabel.Size =
+	UDim2.new(1,-6,0,35)
+
+SpeedLabel.BackgroundTransparency = 1
+
+SpeedLabel.Text =
+	"🚀 Uçuş Hızı: 80"
+
+SpeedLabel.TextColor3 =
+	Color3.fromRGB(255,255,255)
+
+SpeedLabel.Font =
+	Enum.Font.GothamBold
+
+SpeedLabel.TextSize = 14
+
+SpeedLabel.Parent = Scroll
+
+local SpeedBar = Instance.new("Frame")
+
+SpeedBar.Size =
+	UDim2.new(1,-6,0,12)
+
+SpeedBar.BackgroundColor3 =
+	Color3.fromRGB(40,40,45)
+
+SpeedBar.BorderSizePixel = 0
+
+SpeedBar.Parent = Scroll
+
+local SpeedCorner = Instance.new("UICorner")
+
+SpeedCorner.CornerRadius =
+	UDim.new(1,0)
+
+SpeedCorner.Parent = SpeedBar
+
+local SpeedFill = Instance.new("Frame")
+
+SpeedFill.Size =
+	UDim2.new(.38,0,1,0)
+
+SpeedFill.BackgroundColor3 =
+	Color3.fromRGB(220,0,30)
+
+SpeedFill.BorderSizePixel = 0
+
+SpeedFill.Parent = SpeedBar
+
+local FillCorner = Instance.new("UICorner")
+
+FillCorner.CornerRadius =
+	UDim.new(1,0)
+
+FillCorner.Parent = SpeedFill
+
+local draggingSpeed = false
+
+local function SetFlySpeed(x)
+
+	local percent =
+		math.clamp(
+			(x-SpeedBar.AbsolutePosition.X)
+			/SpeedBar.AbsoluteSize.X,
+			0,
+			1
+		)
+
+	FlySpeed =
+		math.floor(
+			20 + percent * 180
+		)
+
+	SpeedFill.Size =
+		UDim2.new(percent,0,1,0)
+
+	SpeedLabel.Text =
+		"🚀 Uçuş Hızı: "..FlySpeed
+
+end
+
+SpeedBar.InputBegan:Connect(function(input)
+
+	if input.UserInputType ==
+		Enum.UserInputType.Touch
+		or input.UserInputType ==
+		Enum.UserInputType.MouseButton1 then
+
+		draggingSpeed = true
+
+		SetFlySpeed(input.Position.X)
+
+	end
+
+end)
+
+UIS.InputChanged:Connect(function(input)
+
+	if draggingSpeed then
+
+		if input.UserInputType ==
+			Enum.UserInputType.Touch
+			or input.UserInputType ==
+			Enum.UserInputType.MouseMovement then
+
+			SetFlySpeed(input.Position.X)
+
+		end
+
+	end
+
+end)
+
+UIS.InputEnded:Connect(function(input)
+
+	if input.UserInputType ==
+		Enum.UserInputType.Touch
+		or input.UserInputType ==
+		Enum.UserInputType.MouseButton1 then
+
+		draggingSpeed = false
+
+	end
+
+end)
+
+--====================================================
+-- MOBILE FLY CONTROLS
+--====================================================
+
+local FlyGui = Instance.new("Frame")
+
+FlyGui.Size =
+	UDim2.fromOffset(260,210)
+
+FlyGui.Position =
+	UDim2.new(1,-280,1,-240)
+
+FlyGui.BackgroundTransparency = 1
+
+FlyGui.Visible = false
+
+FlyGui.Parent = Gui
+
+local function FlyButton(text,x,y)
+
+	local Button = Instance.new("TextButton")
+
+	Button.Size =
+		UDim2.fromOffset(70,60)
+
+	Button.Position =
+		UDim2.fromOffset(x,y)
+
+	Button.BackgroundColor3 =
+		Color3.fromRGB(130,0,20)
+
+	Button.Text =
+		text
+
+	Button.TextColor3 =
+		Color3.new(1,1,1)
+
+	Button.TextSize = 22
+
+	Button.Font =
+		Enum.Font.GothamBlack
+
+	Button.Parent = FlyGui
+
+	local C = Instance.new("UICorner")
+
+	C.CornerRadius =
+		UDim.new(0,15)
+
+	C.Parent = Button
+
+	return Button
+
+end
+
+local Forward =
+	FlyButton("▲",95,65)
+
+local Left =
+	FlyButton("◀",20,65)
+
+local Right =
+	FlyButton("▶",170,65)
+
+local Up =
+	FlyButton("⬆",95,0)
+
+local Down =
+	FlyButton("⬇",95,130)
+
+local Back =
+	FlyButton("▼",95,65)
+
+local HoldState = {
+
+	Forward=false,
+	Left=false,
+	Right=false,
+	Up=false,
+	Down=false,
+	Back=false
+}
+
+local function Hold(Button,Name)
+
+	Button.InputBegan:Connect(function(input)
+
+		if input.UserInputType ==
+			Enum.UserInputType.Touch
+			or input.UserInputType ==
+			Enum.UserInputType.MouseButton1 then
+
+			HoldState[Name] = true
+
+		end
+
+	end)
+
+	Button.InputEnded:Connect(function(input)
+
+		if input.UserInputType ==
+			Enum.UserInputType.Touch
+			or input.UserInputType ==
+			Enum.UserInputType.MouseButton1 then
+
+			HoldState[Name] = false
+
+		end
+
+	end)
+
+end
+
+Hold(Forward,"Forward")
+Hold(Back,"Back")
+Hold(Left,"Left")
+Hold(Right,"Right")
+Hold(Up,"Up")
+Hold(Down,"Down")
+
+--====================================================
+-- MAIN LOOP
+--====================================================
+
 RunService.Heartbeat:Connect(function()
 
 	if not Humanoid or not Humanoid.Parent then
 		return
 	end
 
-	-- Ölümsüzlük / sürekli full can
+	-- ULTRA GOD
 	if State.God then
-		Humanoid.Health = Humanoid.MaxHealth
+
+		Humanoid.MaxHealth = 100
+
+		if Humanoid.Health < 100 then
+			Humanoid.Health = 100
+		end
+
 	end
 
-	-- Hız
+	-- SPEED
+
 	if State.Speed then
 		Humanoid.WalkSpeed = 100
 	else
 		Humanoid.WalkSpeed = 16
 	end
 
-	-- Zıplama
+	-- JUMP
+
 	Humanoid.UseJumpPower = true
 
 	if State.Jump then
@@ -281,72 +623,101 @@ RunService.Heartbeat:Connect(function()
 		Humanoid.JumpPower = 50
 	end
 
-	-- Noclip
+	-- NOCLIP
+
 	if State.Noclip and Character then
-		for _,v in ipairs(Character:GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.CanCollide = false
+
+		for _,obj in ipairs(
+			Character:GetDescendants()
+		) do
+
+			if obj:IsA("BasePart") then
+				obj.CanCollide = false
 			end
+
 		end
+
 	end
 
-	-- Görünmezlik
-	if Character then
-		for _,v in ipairs(Character:GetDescendants()) do
-			if v:IsA("BasePart") then
-				v.LocalTransparencyModifier =
-					State.Invisible and 1 or 0
-			elseif v:IsA("Decal") then
-				v.Transparency =
-					State.Invisible and 1 or 0
-			end
-		end
-	end
+	-- FLY
 
-	-- FullBright
-	if State.FullBright then
-		Lighting.Brightness = 3
-		Lighting.ClockTime = 14
-		Lighting.FogEnd = 100000
-		Lighting.GlobalShadows = false
-	end
-
-	-- Uçuş
 	if State.Fly and Root then
 
-		local cam = workspace.CurrentCamera
-		local dir = Vector3.zero
+		FlyGui.Visible = true
 
-		if UIS:IsKeyDown(Enum.KeyCode.W) then
-			dir += cam.CFrame.LookVector
+		local Camera =
+			workspace.CurrentCamera
+
+		local Direction =
+			Vector3.zero
+
+		if HoldState.Forward then
+			Direction +=
+				Camera.CFrame.LookVector
 		end
 
-		if UIS:IsKeyDown(Enum.KeyCode.S) then
-			dir -= cam.CFrame.LookVector
+		if HoldState.Back then
+			Direction -=
+				Camera.CFrame.LookVector
 		end
 
-		if UIS:IsKeyDown(Enum.KeyCode.A) then
-			dir -= cam.CFrame.RightVector
+		if HoldState.Left then
+			Direction -=
+				Camera.CFrame.RightVector
 		end
 
-		if UIS:IsKeyDown(Enum.KeyCode.D) then
-			dir += cam.CFrame.RightVector
+		if HoldState.Right then
+			Direction +=
+				Camera.CFrame.RightVector
 		end
 
-		if UIS:IsKeyDown(Enum.KeyCode.Space) then
-			dir += Vector3.new(0,1,0)
+		if HoldState.Up then
+			Direction +=
+				Vector3.new(0,1,0)
 		end
 
-		if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then
-			dir -= Vector3.new(0,1,0)
+		if HoldState.Down then
+			Direction -=
+				Vector3.new(0,1,0)
 		end
 
-		if dir.Magnitude > 0 then
-			Root.AssemblyLinearVelocity =
-				dir.Unit * 85
-		else
+		if State.Hover then
+
 			Root.AssemblyLinearVelocity =
 				Vector3.zero
+
+		elseif Direction.Magnitude > 0 then
+
+			Root.AssemblyLinearVelocity =
+				Direction.Unit * FlySpeed
+
+		else
+
+			Root.AssemblyLinearVelocity =
+				Vector3.zero
+
 		end
+
+	else
+
+		FlyGui.Visible = false
+
 	end
+
+end)
+
+--====================================================
+-- SCROLL
+--====================================================
+
+Layout:GetPropertyChangedSignal(
+	"AbsoluteContentSize"
+):Connect(function()
+
+	Scroll.CanvasSize =
+		UDim2.fromOffset(
+			0,
+			Layout.AbsoluteContentSize.Y + 20
+		)
+
 end)
